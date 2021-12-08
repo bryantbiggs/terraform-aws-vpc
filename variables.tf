@@ -1186,3 +1186,21 @@ variable "ipv4_netmask_length" {
   type        = number
   default     = null
 }
+
+variable "ipv6_cidr" {
+  description = "(Optional) IPv6 CIDR block to request from an IPAM Pool. Can be set explicitly or derived from IPAM using `ipv6_netmask_length`."
+  type        = string
+  default     = null
+}
+
+variable "ipv6_ipam_pool_id" {
+  description = "(Optional) IPAM Pool ID for a IPv6 pool. Conflicts with `assign_generated_ipv6_cidr_block`."
+  type        = string
+  default     = null
+}
+
+variable "ipv6_netmask_length" {
+  description = "(Optional) Netmask length to request from IPAM Pool. Conflicts with `ipv6_cidr_block`. This can be omitted if IPAM pool as a `allocation_default_netmask_length` set. Valid values: `56`."
+  type        = number
+  default     = null
+}
