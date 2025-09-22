@@ -6,6 +6,7 @@ If you find a bug, please open an issue with supporting configuration to reprodu
 ## List of backwards incompatible changes
 
 - Terraform `v1.5.7` is now minimum supported version
+- `aws_default_vpc` resource is no longer managed by this module. Users can instead use the resource directly. The default VPC is more of a "legacy" resource that is outside the scope of this module (given the module does not create and that this module can be used many times per region but there is only ever one default VPC per region). Instead, this module focuses on managing the resources it creates in order to simplify its scope of operations.
 
 ## Additional changes
 
@@ -21,7 +22,8 @@ If you find a bug, please open an issue with supporting configuration to reprodu
 
 1. Removed variables:
 
-    -
+    - `manage_default_vpc` - the module no longer manages the default VPC
+    - `default_vpc_*` since the resource is no longer managed by this module
 
 2. Renamed variables:
 
@@ -36,7 +38,7 @@ If you find a bug, please open an issue with supporting configuration to reprodu
     - `vpc_block_public_access_exclusions`
     - Route table association IDs (e.g., `public_route_table_association_ids`) have been removed
     - `vpc_flow_log_destination_type`
-    - `default_vpc_*` outputs have been consolidated into a single `default_vpc` output containing all attributes of the default VPC. Given the low use of these outputs, this simplifies the number of outputs exposed to users while still providing the same level of access to information.
+    - `default_vpc_*` since the resource is no longer managed by this module
     - `cgw_ids` and `cgw_arns` have been removed. Use the `customer_gateway` output instead, which provides the full resource attributes.
     - `nat_ids` - mis-leading given that its a list of EIP allocation IDs
     - `instance_tenancy` given this is controlled by an input variable

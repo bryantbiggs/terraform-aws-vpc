@@ -1333,38 +1333,8 @@ variable "vpn_gateway_tags" {
 }
 
 ################################################################################
-# Default VPC
+# Default Security Group
 ################################################################################
-
-variable "manage_default_vpc" {
-  description = "Should be true to adopt and manage Default VPC"
-  type        = bool
-  default     = false
-}
-
-variable "default_vpc_name" {
-  description = "Name to be used on the Default VPC"
-  type        = string
-  default     = null
-}
-
-variable "default_vpc_enable_dns_support" {
-  description = "Should be true to enable DNS support in the Default VPC"
-  type        = bool
-  default     = true
-}
-
-variable "default_vpc_enable_dns_hostnames" {
-  description = "Should be true to enable DNS hostnames in the Default VPC"
-  type        = bool
-  default     = true
-}
-
-variable "default_vpc_tags" {
-  description = "Additional tags for the Default VPC"
-  type        = map(string)
-  default     = {}
-}
 
 variable "manage_default_security_group" {
   description = "Should be true to adopt and manage default security group"
@@ -1379,15 +1349,35 @@ variable "default_security_group_name" {
 }
 
 variable "default_security_group_ingress" {
-  description = "List of maps of ingress rules to set on the default security group"
-  type        = list(map(string))
-  default     = []
+  description = "List of ingress rules for the default security group"
+  type = list(object({
+    cidr_blocks      = optional(list(string))
+    description      = optional(string)
+    from_port        = string
+    ipv6_cidr_blocks = optional(list(string))
+    prefix_list_ids  = optional(list(string))
+    protocol         = string
+    security_groups  = optional(list(string))
+    self             = optional(bool)
+    to_port          = string
+  }))
+  default = []
 }
 
 variable "default_security_group_egress" {
-  description = "List of maps of egress rules to set on the default security group"
-  type        = list(map(string))
-  default     = []
+  description = "List of egress rules for the default security group"
+  type = list(object({
+    cidr_blocks      = optional(list(string))
+    description      = optional(string)
+    from_port        = string
+    ipv6_cidr_blocks = optional(list(string))
+    prefix_list_ids  = optional(list(string))
+    protocol         = string
+    security_groups  = optional(list(string))
+    self             = optional(bool)
+    to_port          = string
+  }))
+  default = []
 }
 
 variable "default_security_group_tags" {
@@ -1413,8 +1403,18 @@ variable "default_network_acl_name" {
 }
 
 variable "default_network_acl_ingress" {
-  description = "List of maps of ingress rules to set on the Default Network ACL"
-  type        = list(map(string))
+  description = "List of ingress rules for the default network ACL"
+  type = list(object({
+    action          = string
+    cidr_block      = optional(string)
+    from_port       = number
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    ipv6_cidr_block = optional(string)
+    protocol        = string
+    rule_no         = number
+    to_port         = number
+  }))
   default = [
     {
       rule_no    = 100
@@ -1436,8 +1436,18 @@ variable "default_network_acl_ingress" {
 }
 
 variable "default_network_acl_egress" {
-  description = "List of maps of egress rules to set on the Default Network ACL"
-  type        = list(map(string))
+  description = "List of egress rules for the default network ACL"
+  type = list(object({
+    action          = string
+    cidr_block      = optional(string)
+    from_port       = number
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    ipv6_cidr_block = optional(string)
+    protocol        = string
+    rule_no         = number
+    to_port         = number
+  }))
   default = [
     {
       rule_no    = 100
@@ -1488,8 +1498,18 @@ variable "default_route_table_propagating_vgws" {
 
 variable "default_route_table_routes" {
   description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    cidr_block                = optional(string)
+    egress_only_gateway_id    = optional(string)
+    gateway_id                = optional(string)
+    instance_id               = optional(string)
+    ipv6_cidr_block           = optional(string)
+    nat_gateway_id            = optional(string)
+    network_interface_id      = optional(string)
+    transit_gateway_id        = optional(string)
+    vpc_peering_connection_id = optional(string)
+  }))
+  default = []
 }
 
 variable "default_route_table_tags" {
