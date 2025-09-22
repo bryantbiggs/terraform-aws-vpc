@@ -176,6 +176,7 @@ No modules.
 | <a name="input_route_timeouts"></a> [route\_timeouts](#input\_route\_timeouts) | Default create, update, and delete timeout configurations for routes | <pre>object({<br/>    create = optional(string)<br/>    update = optional(string)<br/>    delete = optional(string)<br/>  })</pre> | `null` | no |
 | <a name="input_routes"></a> [routes](#input\_routes) | Map of route definitions to create | <pre>map(object({<br/>    destination_ipv4_cidr_block = optional(string)<br/>    destination_ipv6_cidr_block = optional(string)<br/>    destination_prefix_list_id  = optional(string)<br/>    carrier_gateway_id          = optional(string)<br/>    core_network_arn            = optional(string)<br/>    egress_only_gateway_id      = optional(string)<br/>    gateway_id                  = optional(string)<br/>    local_gateway_id            = optional(string)<br/>    nat_gateway_id              = optional(string)<br/>    network_interface_id        = optional(string)<br/>    transit_gateway_id          = optional(string)<br/>    vpc_endpoint_id             = optional(string)<br/>    vpc_peering_connection_id   = optional(string)<br/>    timeouts = optional(object({<br/>      create = optional(string)<br/>      update = optional(string)<br/>      delete = optional(string)<br/>    }))<br/>  }))</pre> | `{}` | no |
 | <a name="input_share_subnet"></a> [share\_subnet](#input\_share\_subnet) | Controls if the subnet should be shared via RAM resource association | `bool` | `false` | no |
+| <a name="input_subnet_tags"></a> [subnet\_tags](#input\_subnet\_tags) | Additional tags for the subnet | `map(string)` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Create and delete timeout configurations for subnet | <pre>object({<br/>    create = optional(string)<br/>    delete = optional(string)<br/>  })</pre> | `null` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC the resources are created within | `string` | `""` | no |
@@ -185,10 +186,7 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the subnet |
-| <a name="output_ec2_subnet_cidr_reservations"></a> [ec2\_subnet\_cidr\_reservations](#output\_ec2\_subnet\_cidr\_reservations) | Map of EC2 subnet CIDR reservations created and their attributes |
 | <a name="output_egress_only_internet_gateway_id"></a> [egress\_only\_internet\_gateway\_id](#output\_egress\_only\_internet\_gateway\_id) | The ID of the Egress-Only Internet Gateway |
-| <a name="output_eip_allocation_id"></a> [eip\_allocation\_id](#output\_eip\_allocation\_id) | ID that AWS assigns to represent the allocation of the Elastic IP address for use with instances in a VPC |
-| <a name="output_eip_association_id"></a> [eip\_association\_id](#output\_eip\_association\_id) | ID representing the association of the address with an instance in a VPC |
 | <a name="output_eip_carrier_ip"></a> [eip\_carrier\_ip](#output\_eip\_carrier\_ip) | Carrier IP address |
 | <a name="output_eip_customer_owned_ip"></a> [eip\_customer\_owned\_ip](#output\_eip\_customer\_owned\_ip) | Customer owned IP |
 | <a name="output_eip_id"></a> [eip\_id](#output\_eip\_id) | Contains the EIP allocation ID |
@@ -201,19 +199,14 @@ No modules.
 | <a name="output_internet_gateway_id"></a> [internet\_gateway\_id](#output\_internet\_gateway\_id) | The ID of the Internet Gateway |
 | <a name="output_ipv4_cidr_block"></a> [ipv4\_cidr\_block](#output\_ipv4\_cidr\_block) | IPv4 CIDR block assigned to the subnet |
 | <a name="output_ipv6_cidr_block"></a> [ipv6\_cidr\_block](#output\_ipv6\_cidr\_block) | IPv6 CIDR block assigned to the subnet |
-| <a name="output_ipv6_cidr_block_association_id"></a> [ipv6\_cidr\_block\_association\_id](#output\_ipv6\_cidr\_block\_association\_id) | The association ID for the IPv6 CIDR block |
-| <a name="output_nat_gateway_allocation_id"></a> [nat\_gateway\_allocation\_id](#output\_nat\_gateway\_allocation\_id) | The Allocation ID of the Elastic IP address for the gateway |
 | <a name="output_nat_gateway_id"></a> [nat\_gateway\_id](#output\_nat\_gateway\_id) | The ID of the NAT Gateway |
 | <a name="output_nat_gateway_network_interface_id"></a> [nat\_gateway\_network\_interface\_id](#output\_nat\_gateway\_network\_interface\_id) | The ID of the network interface associated with the NAT gateway |
 | <a name="output_nat_gateway_private_ip"></a> [nat\_gateway\_private\_ip](#output\_nat\_gateway\_private\_ip) | The private IP address of the NAT Gateway |
 | <a name="output_nat_gateway_public_ip"></a> [nat\_gateway\_public\_ip](#output\_nat\_gateway\_public\_ip) | The public IP address of the NAT Gateway |
 | <a name="output_owner_id"></a> [owner\_id](#output\_owner\_id) | The ID of the AWS account that owns the subnet |
-| <a name="output_ram_resource_association_id"></a> [ram\_resource\_association\_id](#output\_ram\_resource\_association\_id) | The Amazon Resource Name (ARN) of the resource share |
 | <a name="output_route_table_arn"></a> [route\_table\_arn](#output\_route\_table\_arn) | The ARN of the route table |
-| <a name="output_route_table_gateway_association_ids"></a> [route\_table\_gateway\_association\_ids](#output\_route\_table\_gateway\_association\_ids) | List of subnet route table association IDs |
 | <a name="output_route_table_id"></a> [route\_table\_id](#output\_route\_table\_id) | The ID of the route table |
 | <a name="output_route_table_owner_id"></a> [route\_table\_owner\_id](#output\_route\_table\_owner\_id) | The ID of the AWS account that owns the route table |
-| <a name="output_route_table_subnet_association_id"></a> [route\_table\_subnet\_association\_id](#output\_route\_table\_subnet\_association\_id) | The ID of the route table subnet association |
 | <a name="output_routes"></a> [routes](#output\_routes) | Map of routes created and their attributes |
 <!-- END_TF_DOCS -->
 

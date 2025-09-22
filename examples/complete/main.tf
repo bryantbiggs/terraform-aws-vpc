@@ -189,7 +189,7 @@ module "vpc" {
 module "vpc_endpoints" {
   source = "../../modules/vpc-endpoints"
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   subnet_ids = module.vpc.private_subnets
 
@@ -206,7 +206,7 @@ module "vpc_endpoints" {
   security_group_rules = {
     ingress_https = {
       description = "HTTPS from VPC"
-      cidr_blocks = [module.vpc.vpc_cidr_block]
+      cidr_blocks = [module.vpc.cidr_block]
     }
   }
 
@@ -229,9 +229,9 @@ module "vpc_endpoints" {
     ecs = {
       service             = "ecs"
       private_dns_enabled = true
-      subnet_ids          = module.vpc.private_subnets
+      subnet_ids          = module.vpc.private_subnet_ids
       subnet_configurations = [
-        for v in module.vpc.private_subnet_objects :
+        for v in module.vpc.private_subnets :
         {
           ipv4      = cidrhost(v.cidr_block, 10)
           subnet_id = v.id
@@ -242,24 +242,24 @@ module "vpc_endpoints" {
       create              = false
       service             = "ecs-telemetry"
       private_dns_enabled = true
-      subnet_ids          = module.vpc.private_subnets
+      subnet_ids          = module.vpc.private_subnet_ids
     },
     ecr_api = {
       service             = "ecr.api"
       private_dns_enabled = true
-      subnet_ids          = module.vpc.private_subnets
+      subnet_ids          = module.vpc.private_subnet_ids
       policy              = data.aws_iam_policy_document.generic_endpoint_policy.json
     },
     ecr_dkr = {
       service             = "ecr.dkr"
       private_dns_enabled = true
-      subnet_ids          = module.vpc.private_subnets
+      subnet_ids          = module.vpc.private_subnet_ids
       policy              = data.aws_iam_policy_document.generic_endpoint_policy.json
     },
     rds = {
       service             = "rds"
       private_dns_enabled = true
-      subnet_ids          = module.vpc.private_subnets
+      subnet_ids          = module.vpc.private_subnet_ids
       security_group_ids  = [module.rds_security_group.id]
     },
   }
@@ -328,7 +328,7 @@ data "aws_iam_policy_document" "dynamodb_endpoint_policy" {
       test     = "StringNotEquals"
       variable = "aws:sourceVpc"
 
-      values = [module.vpc.vpc_id]
+      values = [module.vpc.id]
     }
   }
 }
@@ -348,7 +348,7 @@ data "aws_iam_policy_document" "generic_endpoint_policy" {
       test     = "StringNotEquals"
       variable = "aws:SourceVpc"
 
-      values = [module.vpc.vpc_id]
+      values = [module.vpc.id]
     }
   }
 }
@@ -359,7 +359,7 @@ module "rds_security_group" {
 
   name        = "${local.name}-rds"
   description = "Allow PostgreSQL inbound traffic"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = module.vpc.id
 
   ingress_rules = {
     postgresql = {
@@ -367,7 +367,7 @@ module "rds_security_group" {
       from_port   = 5432
       to_port     = 5432
       ip_protocol = "tcp"
-      cidr_ipv4   = module.vpc.vpc_cidr_block
+      cidr_ipv4   = module.vpc.cidr_block
     }
   }
 

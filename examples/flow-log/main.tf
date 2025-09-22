@@ -28,7 +28,7 @@ module "flow_log" {
   source = "../../modules/flow-log"
 
   name   = local.name
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   traffic_type               = "ALL"
   max_aggregation_interval   = 60
@@ -94,7 +94,7 @@ module "flow_log_cloudwatch_external" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-cloudwatch-external"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   create_cloudwatch_log_group = false
   log_destination             = module.flow_log_group.cloudwatch_log_group_arn
@@ -109,7 +109,7 @@ module "flow_log_s3" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-s3"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   log_destination_type = "s3"
   log_destination      = module.s3_bucket.s3_bucket_arn
@@ -121,7 +121,7 @@ module "flow_log_s3_parquet" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-s3-parquet"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   log_destination_type = "s3"
   log_destination      = module.s3_bucket.s3_bucket_arn
@@ -310,7 +310,7 @@ module "flow_log_group" {
   source  = "terraform-aws-modules/cloudwatch/aws//modules/log-group"
   version = "~> 5.0"
 
-  name_prefix       = "/aws/flow-log/vpc/${module.vpc.vpc_id}/${local.name}-external-"
+  name_prefix       = "/aws/flow-log/vpc/${module.vpc.id}/${local.name}-external-"
   retention_in_days = 7
 
   tags = local.tags
