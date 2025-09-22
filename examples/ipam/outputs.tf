@@ -4,17 +4,17 @@
 
 output "vpc_id" {
   description = "The ID of the VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_id
+  value       = module.vpc_ipam_set_netmask.id
 }
 
 output "vpc_arn" {
   description = "The ARN of the VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_arn
+  value       = module.vpc_ipam_set_netmask.arn
 }
 
 output "vpc_cidr_block" {
   description = "The CIDR block of the VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_cidr_block
+  value       = module.vpc_ipam_set_netmask.cidr_block
 }
 
 output "default_security_group_id" {
@@ -32,49 +32,24 @@ output "default_route_table_id" {
   value       = module.vpc_ipam_set_netmask.default_route_table_id
 }
 
-output "vpc_instance_tenancy" {
-  description = "Tenancy of instances spin up within VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_instance_tenancy
-}
-
-output "vpc_enable_dns_support" {
-  description = "Whether or not the VPC has DNS support"
-  value       = module.vpc_ipam_set_netmask.vpc_enable_dns_support
-}
-
-output "vpc_enable_dns_hostnames" {
-  description = "Whether or not the VPC has DNS hostname support"
-  value       = module.vpc_ipam_set_netmask.vpc_enable_dns_hostnames
-}
-
 output "vpc_main_route_table_id" {
   description = "The ID of the main route table associated with this VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_main_route_table_id
-}
-
-output "vpc_ipv6_association_id" {
-  description = "The association ID for the IPv6 CIDR block"
-  value       = module.vpc_ipam_set_netmask.vpc_ipv6_association_id
+  value       = module.vpc_ipam_set_netmask.main_route_table_id
 }
 
 output "vpc_ipv6_cidr_block" {
   description = "The IPv6 CIDR block"
-  value       = module.vpc_ipam_set_netmask.vpc_ipv6_cidr_block
+  value       = module.vpc_ipam_set_netmask.ipv6_cidr_block
 }
 
 output "vpc_secondary_cidr_blocks" {
   description = "List of secondary CIDR blocks of the VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_secondary_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.secondary_cidr_blocks
 }
 
 output "vpc_owner_id" {
   description = "The ID of the AWS account that owns the VPC"
-  value       = module.vpc_ipam_set_netmask.vpc_owner_id
-}
-
-output "vpc_block_public_access_exclusions" {
-  description = "A map of VPC block public access exclusions"
-  value       = module.vpc_ipam_set_netmask.vpc_block_public_access_exclusions
+  value       = module.vpc_ipam_set_netmask.owner_id
 }
 
 ################################################################################
@@ -90,28 +65,28 @@ output "dhcp_options_id" {
 # Internet Gateway
 ################################################################################
 
-output "igw_id" {
+output "internet_gateway_id" {
   description = "The ID of the Internet Gateway"
-  value       = module.vpc_ipam_set_netmask.igw_id
+  value       = module.vpc_ipam_set_netmask.internet_gateway_id
 }
 
-output "igw_arn" {
+output "internet_gateway_arn" {
   description = "The ARN of the Internet Gateway"
-  value       = module.vpc_ipam_set_netmask.igw_arn
+  value       = module.vpc_ipam_set_netmask.internet_gateway_arn
 }
 
 ################################################################################
 # Public Subnets
 ################################################################################
 
-output "public_subnet_objects" {
-  description = "A list of all public subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.public_subnet_objects
+output "public_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.public_subnets
 }
 
-output "public_subnets" {
+output "public_subnet_ids" {
   description = "List of IDs of public subnets"
-  value       = module.vpc_ipam_set_netmask.public_subnets
+  value       = module.vpc_ipam_set_netmask.public_subnet_ids
 }
 
 output "public_subnet_arns" {
@@ -119,34 +94,19 @@ output "public_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.public_subnet_arns
 }
 
-output "public_subnets_cidr_blocks" {
+output "public_subnet_cidr_blocks" {
   description = "List of cidr_blocks of public subnets"
-  value       = module.vpc_ipam_set_netmask.public_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.public_subnet_cidr_blocks
 }
 
-output "public_subnets_ipv6_cidr_blocks" {
+output "public_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of public subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.public_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.public_subnet_ipv6_cidr_blocks
 }
 
 output "public_route_table_ids" {
   description = "List of IDs of public route tables"
   value       = module.vpc_ipam_set_netmask.public_route_table_ids
-}
-
-output "public_internet_gateway_route_id" {
-  description = "ID of the internet gateway route"
-  value       = module.vpc_ipam_set_netmask.public_internet_gateway_route_id
-}
-
-output "public_internet_gateway_ipv6_route_id" {
-  description = "ID of the IPv6 internet gateway route"
-  value       = module.vpc_ipam_set_netmask.public_internet_gateway_ipv6_route_id
-}
-
-output "public_route_table_association_ids" {
-  description = "List of IDs of the public route table association"
-  value       = module.vpc_ipam_set_netmask.public_route_table_association_ids
 }
 
 output "public_network_acl_id" {
@@ -163,14 +123,14 @@ output "public_network_acl_arn" {
 # Private Subnets
 ################################################################################
 
-output "private_subnet_objects" {
-  description = "A list of all private subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.private_subnet_objects
+output "private_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.private_subnets
 }
 
-output "private_subnets" {
+output "private_subnet_ids" {
   description = "List of IDs of private subnets"
-  value       = module.vpc_ipam_set_netmask.private_subnets
+  value       = module.vpc_ipam_set_netmask.private_subnet_ids
 }
 
 output "private_subnet_arns" {
@@ -178,34 +138,19 @@ output "private_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.private_subnet_arns
 }
 
-output "private_subnets_cidr_blocks" {
+output "private_subnet_cidr_blocks" {
   description = "List of cidr_blocks of private subnets"
-  value       = module.vpc_ipam_set_netmask.private_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.private_subnet_cidr_blocks
 }
 
-output "private_subnets_ipv6_cidr_blocks" {
+output "private_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of private subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.private_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.private_subnet_ipv6_cidr_blocks
 }
 
 output "private_route_table_ids" {
   description = "List of IDs of private route tables"
   value       = module.vpc_ipam_set_netmask.private_route_table_ids
-}
-
-output "private_nat_gateway_route_ids" {
-  description = "List of IDs of the private nat gateway route"
-  value       = module.vpc_ipam_set_netmask.private_nat_gateway_route_ids
-}
-
-output "private_ipv6_egress_route_ids" {
-  description = "List of IDs of the ipv6 egress route"
-  value       = module.vpc_ipam_set_netmask.private_ipv6_egress_route_ids
-}
-
-output "private_route_table_association_ids" {
-  description = "List of IDs of the private route table association"
-  value       = module.vpc_ipam_set_netmask.private_route_table_association_ids
 }
 
 output "private_network_acl_id" {
@@ -222,14 +167,14 @@ output "private_network_acl_arn" {
 # Outpost Subnets
 ################################################################################
 
-output "outpost_subnet_objects" {
-  description = "A list of all outpost subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.outpost_subnet_objects
+output "outpost_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.outpost_subnets
 }
 
-output "outpost_subnets" {
+output "outpost_subnet_ids" {
   description = "List of IDs of outpost subnets"
-  value       = module.vpc_ipam_set_netmask.outpost_subnets
+  value       = module.vpc_ipam_set_netmask.outpost_subnet_ids
 }
 
 output "outpost_subnet_arns" {
@@ -237,14 +182,14 @@ output "outpost_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.outpost_subnet_arns
 }
 
-output "outpost_subnets_cidr_blocks" {
+output "outpost_subnet_cidr_blocks" {
   description = "List of cidr_blocks of outpost subnets"
-  value       = module.vpc_ipam_set_netmask.outpost_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.outpost_subnet_cidr_blocks
 }
 
-output "outpost_subnets_ipv6_cidr_blocks" {
+output "outpost_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of outpost subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.outpost_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.outpost_subnet_ipv6_cidr_blocks
 }
 
 output "outpost_network_acl_id" {
@@ -261,14 +206,14 @@ output "outpost_network_acl_arn" {
 # Database Subnets
 ################################################################################
 
-output "database_subnet_objects" {
-  description = "A list of all database subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.database_subnet_objects
+output "database_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.database_subnets
 }
 
-output "database_subnets" {
+output "database_subnet_ids" {
   description = "List of IDs of database subnets"
-  value       = module.vpc_ipam_set_netmask.database_subnets
+  value       = module.vpc_ipam_set_netmask.database_subnet_ids
 }
 
 output "database_subnet_arns" {
@@ -276,19 +221,19 @@ output "database_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.database_subnet_arns
 }
 
-output "database_subnets_cidr_blocks" {
+output "database_subnet_cidr_blocks" {
   description = "List of cidr_blocks of database subnets"
-  value       = module.vpc_ipam_set_netmask.database_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.database_subnet_cidr_blocks
 }
 
-output "database_subnets_ipv6_cidr_blocks" {
+output "database_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of database subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.database_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.database_subnet_ipv6_cidr_blocks
 }
 
-output "database_subnet_group" {
+output "database_subnet_group_id" {
   description = "ID of database subnet group"
-  value       = module.vpc_ipam_set_netmask.database_subnet_group
+  value       = module.vpc_ipam_set_netmask.database_subnet_group_id
 }
 
 output "database_subnet_group_name" {
@@ -299,26 +244,6 @@ output "database_subnet_group_name" {
 output "database_route_table_ids" {
   description = "List of IDs of database route tables"
   value       = module.vpc_ipam_set_netmask.database_route_table_ids
-}
-
-output "database_internet_gateway_route_id" {
-  description = "ID of the database internet gateway route"
-  value       = module.vpc_ipam_set_netmask.database_internet_gateway_route_id
-}
-
-output "database_nat_gateway_route_ids" {
-  description = "List of IDs of the database nat gateway route"
-  value       = module.vpc_ipam_set_netmask.database_nat_gateway_route_ids
-}
-
-output "database_ipv6_egress_route_id" {
-  description = "ID of the database IPv6 egress route"
-  value       = module.vpc_ipam_set_netmask.database_ipv6_egress_route_id
-}
-
-output "database_route_table_association_ids" {
-  description = "List of IDs of the database route table association"
-  value       = module.vpc_ipam_set_netmask.database_route_table_association_ids
 }
 
 output "database_network_acl_id" {
@@ -335,14 +260,14 @@ output "database_network_acl_arn" {
 # Redshift Subnets
 ################################################################################
 
-output "redshift_subnet_objects" {
-  description = "A list of all redshift subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.redshift_subnet_objects
+output "redshift_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.redshift_subnets
 }
 
-output "redshift_subnets" {
+output "redshift_subnet_ids" {
   description = "List of IDs of redshift subnets"
-  value       = module.vpc_ipam_set_netmask.redshift_subnets
+  value       = module.vpc_ipam_set_netmask.redshift_subnet_ids
 }
 
 output "redshift_subnet_arns" {
@@ -350,34 +275,24 @@ output "redshift_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.redshift_subnet_arns
 }
 
-output "redshift_subnets_cidr_blocks" {
+output "redshift_subnet_cidr_blocks" {
   description = "List of cidr_blocks of redshift subnets"
-  value       = module.vpc_ipam_set_netmask.redshift_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.redshift_subnet_cidr_blocks
 }
 
-output "redshift_subnets_ipv6_cidr_blocks" {
+output "redshift_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of redshift subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.redshift_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.redshift_subnet_ipv6_cidr_blocks
 }
 
-output "redshift_subnet_group" {
+output "redshift_subnet_group_id" {
   description = "ID of redshift subnet group"
-  value       = module.vpc_ipam_set_netmask.redshift_subnet_group
+  value       = module.vpc_ipam_set_netmask.redshift_subnet_group_id
 }
 
 output "redshift_route_table_ids" {
   description = "List of IDs of redshift route tables"
   value       = module.vpc_ipam_set_netmask.redshift_route_table_ids
-}
-
-output "redshift_route_table_association_ids" {
-  description = "List of IDs of the redshift route table association"
-  value       = module.vpc_ipam_set_netmask.redshift_route_table_association_ids
-}
-
-output "redshift_public_route_table_association_ids" {
-  description = "List of IDs of the public redshift route table association"
-  value       = module.vpc_ipam_set_netmask.redshift_public_route_table_association_ids
 }
 
 output "redshift_network_acl_id" {
@@ -394,14 +309,14 @@ output "redshift_network_acl_arn" {
 # Elasticache Subnets
 ################################################################################
 
-output "elasticache_subnet_objects" {
-  description = "A list of all elasticache subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.elasticache_subnet_objects
+output "elasticache_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.elasticache_subnets
 }
 
-output "elasticache_subnets" {
+output "elasticache_subnet_ids" {
   description = "List of IDs of elasticache subnets"
-  value       = module.vpc_ipam_set_netmask.elasticache_subnets
+  value       = module.vpc_ipam_set_netmask.elasticache_subnet_ids
 }
 
 output "elasticache_subnet_arns" {
@@ -409,19 +324,19 @@ output "elasticache_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.elasticache_subnet_arns
 }
 
-output "elasticache_subnets_cidr_blocks" {
+output "elasticache_subnet_cidr_blocks" {
   description = "List of cidr_blocks of elasticache subnets"
-  value       = module.vpc_ipam_set_netmask.elasticache_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.elasticache_subnet_cidr_blocks
 }
 
-output "elasticache_subnets_ipv6_cidr_blocks" {
+output "elasticache_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of elasticache subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.elasticache_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.elasticache_subnet_ipv6_cidr_blocks
 }
 
-output "elasticache_subnet_group" {
+output "elasticache_subnet_group_id" {
   description = "ID of elasticache subnet group"
-  value       = module.vpc_ipam_set_netmask.elasticache_subnet_group
+  value       = module.vpc_ipam_set_netmask.elasticache_subnet_group_id
 }
 
 output "elasticache_subnet_group_name" {
@@ -432,11 +347,6 @@ output "elasticache_subnet_group_name" {
 output "elasticache_route_table_ids" {
   description = "List of IDs of elasticache route tables"
   value       = module.vpc_ipam_set_netmask.elasticache_route_table_ids
-}
-
-output "elasticache_route_table_association_ids" {
-  description = "List of IDs of the elasticache route table association"
-  value       = module.vpc_ipam_set_netmask.elasticache_route_table_association_ids
 }
 
 output "elasticache_network_acl_id" {
@@ -453,14 +363,14 @@ output "elasticache_network_acl_arn" {
 # Intra Subnets
 ################################################################################
 
-output "intra_subnet_objects" {
-  description = "A list of all intra subnets, containing the full objects."
-  value       = module.vpc_ipam_set_netmask.intra_subnet_objects
+output "intra_subnets" {
+  description = "A list of all subnets created and their attributes"
+  value       = module.vpc_ipam_set_netmask.intra_subnets
 }
 
-output "intra_subnets" {
+output "intra_subnet_ids" {
   description = "List of IDs of intra subnets"
-  value       = module.vpc_ipam_set_netmask.intra_subnets
+  value       = module.vpc_ipam_set_netmask.intra_subnet_ids
 }
 
 output "intra_subnet_arns" {
@@ -468,24 +378,19 @@ output "intra_subnet_arns" {
   value       = module.vpc_ipam_set_netmask.intra_subnet_arns
 }
 
-output "intra_subnets_cidr_blocks" {
+output "intra_subnet_cidr_blocks" {
   description = "List of cidr_blocks of intra subnets"
-  value       = module.vpc_ipam_set_netmask.intra_subnets_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.intra_subnet_cidr_blocks
 }
 
-output "intra_subnets_ipv6_cidr_blocks" {
+output "intra_subnet_ipv6_cidr_blocks" {
   description = "List of IPv6 cidr_blocks of intra subnets in an IPv6 enabled VPC"
-  value       = module.vpc_ipam_set_netmask.intra_subnets_ipv6_cidr_blocks
+  value       = module.vpc_ipam_set_netmask.intra_subnet_ipv6_cidr_blocks
 }
 
 output "intra_route_table_ids" {
   description = "List of IDs of intra route tables"
   value       = module.vpc_ipam_set_netmask.intra_route_table_ids
-}
-
-output "intra_route_table_association_ids" {
-  description = "List of IDs of the intra route table association"
-  value       = module.vpc_ipam_set_netmask.intra_route_table_association_ids
 }
 
 output "intra_network_acl_id" {
@@ -502,24 +407,19 @@ output "intra_network_acl_arn" {
 # NAT Gateway
 ################################################################################
 
-output "nat_ids" {
-  description = "List of allocation ID of Elastic IPs created for AWS NAT Gateway"
-  value       = module.vpc_ipam_set_netmask.nat_ids
+output "nat_gateway_public_ips" {
+  description = "List of public Elastic IPs used by the AWS NAT Gateways created"
+  value       = module.vpc_ipam_set_netmask.nat_gateway_public_ips
 }
 
-output "nat_public_ips" {
-  description = "List of public Elastic IPs created for AWS NAT Gateway"
-  value       = module.vpc_ipam_set_netmask.nat_public_ips
-}
-
-output "natgw_ids" {
+output "nat_gateway_ids" {
   description = "List of NAT Gateway IDs"
-  value       = module.vpc_ipam_set_netmask.natgw_ids
+  value       = module.vpc_ipam_set_netmask.nat_gateway_ids
 }
 
-output "natgw_interface_ids" {
+output "nat_gateway_interface_ids" {
   description = "List of Network Interface IDs assigned to NAT Gateways"
-  value       = module.vpc_ipam_set_netmask.natgw_interface_ids
+  value       = module.vpc_ipam_set_netmask.nat_gateway_interface_ids
 }
 
 ################################################################################
@@ -535,116 +435,56 @@ output "egress_only_internet_gateway_id" {
 # Customer Gateway
 ################################################################################
 
-output "cgw_ids" {
-  description = "List of IDs of Customer Gateway"
-  value       = module.vpc_ipam_set_netmask.cgw_ids
-}
-
-output "cgw_arns" {
-  description = "List of ARNs of Customer Gateway"
-  value       = module.vpc_ipam_set_netmask.cgw_arns
-}
-
-output "this_customer_gateway" {
-  description = "Map of Customer Gateway attributes"
-  value       = module.vpc_ipam_set_netmask.this_customer_gateway
+output "customer_gateways" {
+  description = "Map of Customer Gateway's created and their attributes"
+  value       = module.vpc_ipam_set_netmask.customer_gateways
 }
 
 ################################################################################
 # VPN Gateway
 ################################################################################
 
-output "vgw_id" {
+output "vpn_gateway_id" {
   description = "The ID of the VPN Gateway"
-  value       = module.vpc_ipam_set_netmask.vgw_id
+  value       = module.vpc_ipam_set_netmask.vpn_gateway_id
 }
 
-output "vgw_arn" {
+output "vpn_gateway_arn" {
   description = "The ARN of the VPN Gateway"
-  value       = module.vpc_ipam_set_netmask.vgw_arn
+  value       = module.vpc_ipam_set_netmask.vpn_gateway_arn
 }
 
 ################################################################################
 # Default VPC
 ################################################################################
 
-output "default_vpc_id" {
-  description = "The ID of the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_id
-}
-
-output "default_vpc_arn" {
-  description = "The ARN of the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_arn
-}
-
-output "default_vpc_cidr_block" {
-  description = "The CIDR block of the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_cidr_block
-}
-
-output "default_vpc_default_security_group_id" {
-  description = "The ID of the security group created by default on Default VPC creation"
-  value       = module.vpc_ipam_set_netmask.default_vpc_default_security_group_id
-}
-
-output "default_vpc_default_network_acl_id" {
-  description = "The ID of the default network ACL of the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_default_network_acl_id
-}
-
-output "default_vpc_default_route_table_id" {
-  description = "The ID of the default route table of the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_default_route_table_id
-}
-
-output "default_vpc_instance_tenancy" {
-  description = "Tenancy of instances spin up within Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_instance_tenancy
-}
-
-output "default_vpc_enable_dns_support" {
-  description = "Whether or not the Default VPC has DNS support"
-  value       = module.vpc_ipam_set_netmask.default_vpc_enable_dns_support
-}
-
-output "default_vpc_enable_dns_hostnames" {
-  description = "Whether or not the Default VPC has DNS hostname support"
-  value       = module.vpc_ipam_set_netmask.default_vpc_enable_dns_hostnames
-}
-
-output "default_vpc_main_route_table_id" {
-  description = "The ID of the main route table associated with the Default VPC"
-  value       = module.vpc_ipam_set_netmask.default_vpc_main_route_table_id
+output "default_vpc" {
+  description = "The Default VPC attributes"
+  value       = module.vpc_ipam_set_netmask.default_vpc
 }
 
 ################################################################################
 # VPC Flow Log
 ################################################################################
 
-output "vpc_flow_log_id" {
+output "flow_log_id" {
   description = "The ID of the Flow Log resource"
-  value       = module.vpc_ipam_set_netmask.vpc_flow_log_id
+  value       = module.vpc_ipam_set_netmask.flow_log_id
 }
 
-output "vpc_flow_log_destination_arn" {
+output "flow_log_destination_arn" {
   description = "The ARN of the destination for VPC Flow Logs"
-  value       = module.vpc_ipam_set_netmask.vpc_flow_log_destination_arn
+  value       = module.vpc_ipam_set_netmask.flow_log_destination_arn
 }
 
-output "vpc_flow_log_destination_type" {
-  description = "The type of the destination for VPC Flow Logs"
-  value       = module.vpc_ipam_set_netmask.vpc_flow_log_destination_type
-}
-
-output "vpc_flow_log_cloudwatch_iam_role_arn" {
+output "flow_log_cloudwatch_iam_role_arn" {
   description = "The ARN of the IAM role used when pushing logs to Cloudwatch log group"
-  value       = module.vpc_ipam_set_netmask.vpc_flow_log_cloudwatch_iam_role_arn
+  value       = module.vpc_ipam_set_netmask.flow_log_cloudwatch_iam_role_arn
 }
 
-output "vpc_flow_log_deliver_cross_account_role" {
+output "flow_log_deliver_cross_account_role" {
   description = "The ARN of the IAM role used when pushing logs cross account"
-  value       = module.vpc_ipam_set_netmask.vpc_flow_log_deliver_cross_account_role
+  value       = module.vpc_ipam_set_netmask.flow_log_deliver_cross_account_role
 }
 
 ################################################################################

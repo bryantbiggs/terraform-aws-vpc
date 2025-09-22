@@ -26,7 +26,7 @@ module "flow_log" {
   source = "../../modules/flow-log"
 
   name   = local.name
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   tags = local.tags
 }
@@ -35,7 +35,7 @@ module "flow_log_cloudwatch_external" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-cloudwatch-external"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   create_cloudwatch_log_group = false
   log_destination             = aws_cloudwatch_log_group.flow_log.arn
@@ -50,7 +50,7 @@ module "flow_log_s3" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-s3"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   log_destination_type = "s3"
   log_destination      = module.s3_bucket.s3_bucket_arn
@@ -62,7 +62,7 @@ module "flow_log_s3_parquet" {
   source = "../../modules/flow-log"
 
   name   = "${local.name}-s3-parquet"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.id
 
   log_destination_type = "s3"
   log_destination      = module.s3_bucket.s3_bucket_arn
@@ -112,7 +112,7 @@ module "s3_bucket" {
 }
 
 resource "aws_cloudwatch_log_group" "flow_log" {
-  name_prefix = "/aws/flow-log/vpc/${module.vpc.vpc_id}/${local.name}-external-"
+  name_prefix = "/aws/flow-log/vpc/${module.vpc.id}/${local.name}-external-"
 
   retention_in_days = 7
 

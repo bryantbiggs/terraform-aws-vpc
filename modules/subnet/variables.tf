@@ -148,7 +148,7 @@ variable "cidr_reservations" {
     description      = optional(string)
     reservation_type = string
   }))
-  default = {}
+  default  = {}
   nullable = false
 }
 
@@ -204,7 +204,7 @@ variable "route_table_tags" {
   description = "Additional tags for the VPC"
   type        = map(string)
   default     = {}
-  nullable = false
+  nullable    = false
 }
 
 ################################################################################
@@ -233,7 +233,7 @@ variable "routes" {
       delete = optional(string)
     }))
   }))
-  default = {}
+  default  = {}
   nullable = false
 }
 
