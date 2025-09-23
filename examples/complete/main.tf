@@ -306,7 +306,7 @@ module "vpc_endpoints_nocreate" {
 module "disabled" {
   source = "../../"
 
-  create_vpc = false
+  create        = false
 }
 
 ################################################################################

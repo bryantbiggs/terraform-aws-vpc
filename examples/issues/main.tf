@@ -100,5 +100,5 @@ module "overlapping_public_subnets" {
 module "disabled" {
   source = "../../"
 
-  create_vpc = false
+  create        = false
 }
