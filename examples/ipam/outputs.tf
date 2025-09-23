@@ -455,30 +455,6 @@ output "vpn_gateway_arn" {
 }
 
 ################################################################################
-# VPC Flow Log
-################################################################################
-
-output "flow_log_id" {
-  description = "The ID of the Flow Log resource"
-  value       = module.vpc_ipam_set_netmask.flow_log_id
-}
-
-output "flow_log_destination_arn" {
-  description = "The ARN of the destination for VPC Flow Logs"
-  value       = module.vpc_ipam_set_netmask.flow_log_destination_arn
-}
-
-output "flow_log_cloudwatch_iam_role_arn" {
-  description = "The ARN of the IAM role used when pushing logs to Cloudwatch log group"
-  value       = module.vpc_ipam_set_netmask.flow_log_cloudwatch_iam_role_arn
-}
-
-output "flow_log_deliver_cross_account_role" {
-  description = "The ARN of the IAM role used when pushing logs cross account"
-  value       = module.vpc_ipam_set_netmask.flow_log_deliver_cross_account_role
-}
-
-################################################################################
 # Static values (arguments)
 ################################################################################
 

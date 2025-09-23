@@ -18,7 +18,7 @@ locals {
   # Use `local.vpc_id` to give a hint to Terraform that subnets should be deleted before secondary CIDR blocks can be free!
   vpc_id = try(aws_vpc_ipv4_cidr_block_association.this[0].vpc_id, aws_vpc.this[0].id, "")
 
-  create_vpc = var.create_vpc && var.putin_khuylo
+  create = var.create && var.putin_khuylo
 }
 
 ################################################################################
@@ -26,7 +26,7 @@ locals {
 ################################################################################
 
 resource "aws_vpc" "this" {
-  count = local.create_vpc ? 1 : 0
+  count = local.create ? 1 : 0
 
   region = var.region
 
@@ -53,7 +53,7 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_vpc_ipv4_cidr_block_association" "this" {
-  count = local.create_vpc && length(var.secondary_cidr_blocks) > 0 ? length(var.secondary_cidr_blocks) : 0
+  count = local.create && length(var.secondary_cidr_blocks) > 0 ? length(var.secondary_cidr_blocks) : 0
 
   region = var.region
 
@@ -64,7 +64,7 @@ resource "aws_vpc_ipv4_cidr_block_association" "this" {
 }
 
 resource "aws_vpc_block_public_access_options" "this" {
-  count = local.create_vpc && length(keys(var.vpc_block_public_access_options)) > 0 ? 1 : 0
+  count = local.create && length(keys(var.vpc_block_public_access_options)) > 0 ? 1 : 0
 
   region = var.region
 
@@ -72,7 +72,7 @@ resource "aws_vpc_block_public_access_options" "this" {
 }
 
 resource "aws_vpc_block_public_access_exclusion" "this" {
-  for_each = { for k, v in var.vpc_block_public_access_exclusions : k => v if local.create_vpc }
+  for_each = { for k, v in var.vpc_block_public_access_exclusions : k => v if local.create }
 
   region = var.region
 
@@ -105,7 +105,7 @@ resource "aws_vpc_block_public_access_exclusion" "this" {
 ################################################################################
 
 resource "aws_vpc_dhcp_options" "this" {
-  count = local.create_vpc && var.enable_dhcp_options ? 1 : 0
+  count = local.create && var.enable_dhcp_options ? 1 : 0
 
   region = var.region
 
@@ -124,7 +124,7 @@ resource "aws_vpc_dhcp_options" "this" {
 }
 
 resource "aws_vpc_dhcp_options_association" "this" {
-  count = local.create_vpc && var.enable_dhcp_options ? 1 : 0
+  count = local.create && var.enable_dhcp_options ? 1 : 0
 
   region = var.region
 
@@ -137,7 +137,7 @@ resource "aws_vpc_dhcp_options_association" "this" {
 ################################################################################
 
 locals {
-  create_public_subnets   = local.create_vpc && local.len_public_subnets > 0
+  create_public_subnets   = local.create && local.len_public_subnets > 0
   num_public_route_tables = var.create_multiple_public_route_tables ? local.len_public_subnets : 1
 }
 
@@ -286,7 +286,7 @@ resource "aws_network_acl_rule" "public_outbound" {
 ################################################################################
 
 locals {
-  create_private_subnets = local.create_vpc && local.len_private_subnets > 0
+  create_private_subnets = local.create && local.len_private_subnets > 0
 }
 
 resource "aws_subnet" "private" {
@@ -417,7 +417,7 @@ resource "aws_network_acl_rule" "private_outbound" {
 ################################################################################
 
 locals {
-  create_database_subnets     = local.create_vpc && local.len_database_subnets > 0
+  create_database_subnets     = local.create && local.len_database_subnets > 0
   create_database_route_table = local.create_database_subnets && var.create_database_subnet_route_table
 }
 
@@ -621,7 +621,7 @@ resource "aws_network_acl_rule" "database_outbound" {
 ################################################################################
 
 locals {
-  create_redshift_subnets     = local.create_vpc && local.len_redshift_subnets > 0
+  create_redshift_subnets     = local.create && local.len_redshift_subnets > 0
   create_redshift_route_table = local.create_redshift_subnets && var.create_redshift_subnet_route_table
 }
 
@@ -774,7 +774,7 @@ resource "aws_network_acl_rule" "redshift_outbound" {
 ################################################################################
 
 locals {
-  create_elasticache_subnets     = local.create_vpc && local.len_elasticache_subnets > 0
+  create_elasticache_subnets     = local.create && local.len_elasticache_subnets > 0
   create_elasticache_route_table = local.create_elasticache_subnets && var.create_elasticache_subnet_route_table
 }
 
@@ -918,7 +918,7 @@ resource "aws_network_acl_rule" "elasticache_outbound" {
 ################################################################################
 
 locals {
-  create_intra_subnets   = local.create_vpc && local.len_intra_subnets > 0
+  create_intra_subnets   = local.create && local.len_intra_subnets > 0
   num_intra_route_tables = var.create_multiple_intra_route_tables ? local.len_intra_subnets : 1
 }
 
@@ -1045,7 +1045,7 @@ resource "aws_network_acl_rule" "intra_outbound" {
 ################################################################################
 
 locals {
-  create_outpost_subnets = local.create_vpc && local.len_outpost_subnets > 0
+  create_outpost_subnets = local.create && local.len_outpost_subnets > 0
 }
 
 resource "aws_subnet" "outpost" {
@@ -1171,7 +1171,7 @@ resource "aws_internet_gateway" "this" {
 }
 
 resource "aws_egress_only_internet_gateway" "this" {
-  count = local.create_vpc && var.create_egress_only_igw && var.enable_ipv6 && local.max_subnet_length > 0 ? 1 : 0
+  count = local.create && var.create_egress_only_igw && var.enable_ipv6 && local.max_subnet_length > 0 ? 1 : 0
 
   region = var.region
 
@@ -1185,7 +1185,7 @@ resource "aws_egress_only_internet_gateway" "this" {
 }
 
 resource "aws_route" "private_ipv6_egress" {
-  count = local.create_vpc && var.create_egress_only_igw && var.enable_ipv6 && local.len_private_subnets > 0 ? local.nat_gateway_count : 0
+  count = local.create && var.create_egress_only_igw && var.enable_ipv6 && local.len_private_subnets > 0 ? local.nat_gateway_count : 0
 
   region = var.region
 
@@ -1204,7 +1204,7 @@ locals {
 }
 
 resource "aws_eip" "nat" {
-  count = local.create_vpc && var.enable_nat_gateway && !var.reuse_nat_ips ? local.nat_gateway_count : 0
+  count = local.create && var.enable_nat_gateway && !var.reuse_nat_ips ? local.nat_gateway_count : 0
 
   region = var.region
 
@@ -1225,7 +1225,7 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "this" {
-  count = local.create_vpc && var.enable_nat_gateway ? local.nat_gateway_count : 0
+  count = local.create && var.enable_nat_gateway ? local.nat_gateway_count : 0
 
   region = var.region
 
@@ -1253,7 +1253,7 @@ resource "aws_nat_gateway" "this" {
 }
 
 resource "aws_route" "private_nat_gateway" {
-  count = local.create_vpc && var.enable_nat_gateway && var.create_private_nat_gateway_route ? local.nat_gateway_count : 0
+  count = local.create && var.enable_nat_gateway && var.create_private_nat_gateway_route ? local.nat_gateway_count : 0
 
   region = var.region
 
@@ -1267,7 +1267,7 @@ resource "aws_route" "private_nat_gateway" {
 }
 
 resource "aws_route" "private_dns64_nat_gateway" {
-  count = local.create_vpc && var.enable_nat_gateway && var.enable_ipv6 && var.private_subnet_enable_dns64 ? local.nat_gateway_count : 0
+  count = local.create && var.enable_nat_gateway && var.enable_ipv6 && var.private_subnet_enable_dns64 ? local.nat_gateway_count : 0
 
   region = var.region
 
@@ -1310,7 +1310,7 @@ resource "aws_customer_gateway" "this" {
 ################################################################################
 
 resource "aws_vpn_gateway" "this" {
-  count = local.create_vpc && var.enable_vpn_gateway ? 1 : 0
+  count = local.create && var.enable_vpn_gateway ? 1 : 0
 
   region = var.region
 
@@ -1335,7 +1335,7 @@ resource "aws_vpn_gateway_attachment" "this" {
 }
 
 resource "aws_vpn_gateway_route_propagation" "public" {
-  count = local.create_vpc && var.propagate_public_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? 1 : 0
+  count = local.create && var.propagate_public_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? 1 : 0
 
   region = var.region
 
@@ -1350,7 +1350,7 @@ resource "aws_vpn_gateway_route_propagation" "public" {
 }
 
 resource "aws_vpn_gateway_route_propagation" "private" {
-  count = local.create_vpc && var.propagate_private_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? local.len_private_subnets : 0
+  count = local.create && var.propagate_private_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? local.len_private_subnets : 0
 
   region = var.region
 
@@ -1365,7 +1365,7 @@ resource "aws_vpn_gateway_route_propagation" "private" {
 }
 
 resource "aws_vpn_gateway_route_propagation" "intra" {
-  count = local.create_vpc && var.propagate_intra_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? local.len_intra_subnets : 0
+  count = local.create && var.propagate_intra_route_tables_vgw && (var.enable_vpn_gateway || var.vpn_gateway_id != "") ? local.len_intra_subnets : 0
 
   region = var.region
 
