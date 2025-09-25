@@ -115,10 +115,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [aws_ec2_subnet_cidr_reservation.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_subnet_cidr_reservation) | resource |
-| [aws_egress_only_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/egress_only_internet_gateway) | resource |
 | [aws_eip.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
-| [aws_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
-| [aws_internet_gateway_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway_attachment) | resource |
 | [aws_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
 | [aws_ram_resource_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ram_resource_association) | resource |
 | [aws_route.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
@@ -132,15 +129,12 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_assign_ipv6_address_on_creation"></a> [assign\_ipv6\_address\_on\_creation](#input\_assign\_ipv6\_address\_on\_creation) | Specify true to indicate that network interfaces created in the specified subnet should be assigned an IPv6 address | `bool` | `null` | no |
-| <a name="input_associated_gateways"></a> [associated\_gateways](#input\_associated\_gateways) | Map of gateways to associate with the route table | `map(string)` | `{}` | no |
-| <a name="input_attach_internet_gateway"></a> [attach\_internet\_gateway](#input\_attach\_internet\_gateway) | Controls if an internet gateway is attached to the VPC | `bool` | `true` | no |
+| <a name="input_associated_gateways"></a> [associated\_gateways](#input\_associated\_gateways) | Map of gateways to associate with the route table | <pre>map(object({<br/>    id = string<br/>    timeouts = optional(object({<br/>      create = optional(string)<br/>      update = optional(string)<br/>      delete = optional(string)<br/>    }))<br/>  }))</pre> | `{}` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | AZ for the subnet | `string` | `null` | no |
 | <a name="input_availability_zone_id"></a> [availability\_zone\_id](#input\_availability\_zone\_id) | AZ ID of the subnet. This argument is not supported in all regions or partitions. If necessary, use `availability_zone` instead | `string` | `null` | no |
 | <a name="input_cidr_reservations"></a> [cidr\_reservations](#input\_cidr\_reservations) | Map of CIDR reservations to create | <pre>map(object({<br/>    cidr_block       = string<br/>    description      = optional(string)<br/>    reservation_type = string<br/>  }))</pre> | `{}` | no |
 | <a name="input_create"></a> [create](#input\_create) | Controls if resources should be created | `bool` | `true` | no |
-| <a name="input_create_egress_only_internet_gateway"></a> [create\_egress\_only\_internet\_gateway](#input\_create\_egress\_only\_internet\_gateway) | Controls if an egress only internet gateway is created | `bool` | `false` | no |
 | <a name="input_create_eip"></a> [create\_eip](#input\_create\_eip) | Controls if an EIP should be created for the NAT gateway | `bool` | `true` | no |
-| <a name="input_create_internet_gateway"></a> [create\_internet\_gateway](#input\_create\_internet\_gateway) | Controls if an internet gateway is created | `bool` | `true` | no |
 | <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway) | Controls if a NAT gateway should be created | `bool` | `true` | no |
 | <a name="input_create_route_table"></a> [create\_route\_table](#input\_create\_route\_table) | Controls if a route table should be created | `bool` | `true` | no |
 | <a name="input_customer_owned_ipv4_pool"></a> [customer\_owned\_ipv4\_pool](#input\_customer\_owned\_ipv4\_pool) | The customer owned IPv4 address pool. Typically used with the `map_customer_owned_ip_on_launch` argument. The `outpost_arn` argument must be specified when configured | `string` | `null` | no |
@@ -153,8 +147,6 @@ No modules.
 | <a name="input_enable_lni_at_device_index"></a> [enable\_lni\_at\_device\_index](#input\_enable\_lni\_at\_device\_index) | Indicates the device position for local network interfaces in this subnet | `number` | `null` | no |
 | <a name="input_enable_resource_name_dns_a_record_on_launch"></a> [enable\_resource\_name\_dns\_a\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_a\_record\_on\_launch) | Indicates whether to respond to DNS queries for instance hostnames with DNS A records | `bool` | `null` | no |
 | <a name="input_enable_resource_name_dns_aaaa_record_on_launch"></a> [enable\_resource\_name\_dns\_aaaa\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_aaaa\_record\_on\_launch) | Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records | `bool` | `null` | no |
-| <a name="input_internet_gateway_id"></a> [internet\_gateway\_id](#input\_internet\_gateway\_id) | The ID of an existing internet gateway to attach to the VPC. Reqiured if `create_internet_gateway` is `false` and `attach_internet_gateway` is `true` | `string` | `null` | no |
-| <a name="input_internet_gateway_tags"></a> [internet\_gateway\_tags](#input\_internet\_gateway\_tags) | Additional tags for the internet gateway/egress only internet gateway | `map(string)` | `{}` | no |
 | <a name="input_ipv4_cidr_block"></a> [ipv4\_cidr\_block](#input\_ipv4\_cidr\_block) | The IPv4 CIDR block for the subnet | `string` | `null` | no |
 | <a name="input_ipv6_cidr_block"></a> [ipv6\_cidr\_block](#input\_ipv6\_cidr\_block) | The IPv6 network range for the subnet, in CIDR notation. The subnet size must use a /64 prefix length | `string` | `null` | no |
 | <a name="input_ipv6_native"></a> [ipv6\_native](#input\_ipv6\_native) | Indicates whether to create an IPv6-only subnet | `bool` | `null` | no |
@@ -168,13 +160,13 @@ No modules.
 | <a name="input_private_dns_hostname_type_on_launch"></a> [private\_dns\_hostname\_type\_on\_launch](#input\_private\_dns\_hostname\_type\_on\_launch) | The type of hostnames to assign to instances in the subnet at launch. For IPv6-only subnets, an instance DNS name must be based on the instance ID. For dual-stack and IPv4-only subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | Region where the resource(s) will be managed. Defaults to the Region set in the provider configuration | `string` | `null` | no |
 | <a name="input_resource_share_arn"></a> [resource\_share\_arn](#input\_resource\_share\_arn) | Amazon Resource Name (ARN) of the RAM Resource Share | `string` | `null` | no |
-| <a name="input_route_table_association_timeouts"></a> [route\_table\_association\_timeouts](#input\_route\_table\_association\_timeouts) | Create, update, and delete timeout configurations for route table association | `map(string)` | `{}` | no |
+| <a name="input_route_table_association_timeouts"></a> [route\_table\_association\_timeouts](#input\_route\_table\_association\_timeouts) | Create, update, and delete timeout configurations for route table association | <pre>map(object({<br/>    create = optional(string)<br/>    update = optional(string)<br/>    delete = optional(string)<br/>  }))</pre> | `null` | no |
 | <a name="input_route_table_id"></a> [route\_table\_id](#input\_route\_table\_id) | The ID of an existing route table to associate with the subnet | `string` | `null` | no |
 | <a name="input_route_table_propagating_vgws"></a> [route\_table\_propagating\_vgws](#input\_route\_table\_propagating\_vgws) | List of virtual gateways for route propagation | `list(string)` | `[]` | no |
 | <a name="input_route_table_tags"></a> [route\_table\_tags](#input\_route\_table\_tags) | Additional tags for the VPC | `map(string)` | `{}` | no |
 | <a name="input_route_table_timeouts"></a> [route\_table\_timeouts](#input\_route\_table\_timeouts) | Create, update, and delete timeout configurations for route table | <pre>object({<br/>    create = optional(string)<br/>    update = optional(string)<br/>    delete = optional(string)<br/>  })</pre> | `null` | no |
 | <a name="input_route_timeouts"></a> [route\_timeouts](#input\_route\_timeouts) | Default create, update, and delete timeout configurations for routes | <pre>object({<br/>    create = optional(string)<br/>    update = optional(string)<br/>    delete = optional(string)<br/>  })</pre> | `null` | no |
-| <a name="input_routes"></a> [routes](#input\_routes) | Map of route definitions to create | <pre>map(object({<br/>    destination_ipv4_cidr_block = optional(string)<br/>    destination_ipv6_cidr_block = optional(string)<br/>    destination_prefix_list_id  = optional(string)<br/>    carrier_gateway_id          = optional(string)<br/>    core_network_arn            = optional(string)<br/>    egress_only_gateway_id      = optional(string)<br/>    gateway_id                  = optional(string)<br/>    local_gateway_id            = optional(string)<br/>    nat_gateway_id              = optional(string)<br/>    network_interface_id        = optional(string)<br/>    transit_gateway_id          = optional(string)<br/>    vpc_endpoint_id             = optional(string)<br/>    vpc_peering_connection_id   = optional(string)<br/>    timeouts = optional(object({<br/>      create = optional(string)<br/>      update = optional(string)<br/>      delete = optional(string)<br/>    }))<br/>  }))</pre> | `{}` | no |
+| <a name="input_routes"></a> [routes](#input\_routes) | Map of route definitions to create | <pre>map(object({<br/>    destination_ipv4_cidr_block = optional(string)<br/>    destination_ipv6_cidr_block = optional(string)<br/>    destination_prefix_list_id  = optional(string)<br/>    carrier_gateway_id          = optional(string)<br/>    core_network_arn            = optional(string)<br/>    egress_only_gateway_id      = optional(string)<br/>    # this_egress_only_gateway  = optional(bool)<br/>    gateway_id = optional(string)<br/>    # this_internet_gateway     = optional(bool)<br/>    local_gateway_id          = optional(string)<br/>    nat_gateway_id            = optional(string)<br/>    this_nat_gateway          = optional(bool, false)<br/>    network_interface_id      = optional(string)<br/>    transit_gateway_id        = optional(string)<br/>    vpc_endpoint_id           = optional(string)<br/>    vpc_peering_connection_id = optional(string)<br/>    timeouts = optional(object({<br/>      create = optional(string)<br/>      update = optional(string)<br/>      delete = optional(string)<br/>    }))<br/>  }))</pre> | `{}` | no |
 | <a name="input_share_subnet"></a> [share\_subnet](#input\_share\_subnet) | Controls if the subnet should be shared via RAM resource association | `bool` | `false` | no |
 | <a name="input_subnet_tags"></a> [subnet\_tags](#input\_subnet\_tags) | Additional tags for the subnet | `map(string)` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
@@ -186,7 +178,6 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the subnet |
-| <a name="output_egress_only_internet_gateway_id"></a> [egress\_only\_internet\_gateway\_id](#output\_egress\_only\_internet\_gateway\_id) | The ID of the Egress-Only Internet Gateway |
 | <a name="output_eip_carrier_ip"></a> [eip\_carrier\_ip](#output\_eip\_carrier\_ip) | Carrier IP address |
 | <a name="output_eip_customer_owned_ip"></a> [eip\_customer\_owned\_ip](#output\_eip\_customer\_owned\_ip) | Customer owned IP |
 | <a name="output_eip_id"></a> [eip\_id](#output\_eip\_id) | Contains the EIP allocation ID |
@@ -195,8 +186,6 @@ No modules.
 | <a name="output_eip_public_dns"></a> [eip\_public\_dns](#output\_eip\_public\_dns) | Public DNS associated with the Elastic IP address |
 | <a name="output_eip_public_ip"></a> [eip\_public\_ip](#output\_eip\_public\_ip) | Contains the public IP address |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the subnet |
-| <a name="output_internet_gateway_arn"></a> [internet\_gateway\_arn](#output\_internet\_gateway\_arn) | The ARN of the Internet Gateway |
-| <a name="output_internet_gateway_id"></a> [internet\_gateway\_id](#output\_internet\_gateway\_id) | The ID of the Internet Gateway |
 | <a name="output_ipv4_cidr_block"></a> [ipv4\_cidr\_block](#output\_ipv4\_cidr\_block) | IPv4 CIDR block assigned to the subnet |
 | <a name="output_ipv6_cidr_block"></a> [ipv6\_cidr\_block](#output\_ipv6\_cidr\_block) | IPv6 CIDR block assigned to the subnet |
 | <a name="output_nat_gateway_id"></a> [nat\_gateway\_id](#output\_nat\_gateway\_id) | The ID of the NAT Gateway |

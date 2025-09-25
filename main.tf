@@ -1157,7 +1157,7 @@ resource "aws_network_acl_rule" "outpost_outbound" {
 ################################################################################
 
 resource "aws_internet_gateway" "this" {
-  count = local.create_public_subnets && var.create_igw ? 1 : 0
+  count = local.create && var.create_igw ? 1 : 0
 
   region = var.region
 
