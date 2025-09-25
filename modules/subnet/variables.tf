@@ -220,13 +220,16 @@ variable "routes" {
     carrier_gateway_id          = optional(string)
     core_network_arn            = optional(string)
     egress_only_gateway_id      = optional(string)
-    gateway_id                  = optional(string)
-    local_gateway_id            = optional(string)
-    nat_gateway_id              = optional(string)
-    network_interface_id        = optional(string)
-    transit_gateway_id          = optional(string)
-    vpc_endpoint_id             = optional(string)
-    vpc_peering_connection_id   = optional(string)
+    # this_egress_only_gateway  = optional(bool)
+    gateway_id = optional(string)
+    # this_internet_gateway     = optional(bool)
+    local_gateway_id          = optional(string)
+    nat_gateway_id            = optional(string)
+    this_nat_gateway          = optional(bool, false)
+    network_interface_id      = optional(string)
+    transit_gateway_id        = optional(string)
+    vpc_endpoint_id           = optional(string)
+    vpc_peering_connection_id = optional(string)
     timeouts = optional(object({
       create = optional(string)
       update = optional(string)
@@ -253,14 +256,25 @@ variable "route_timeouts" {
 
 variable "associated_gateways" {
   description = "Map of gateways to associate with the route table"
-  type        = map(string)
-  default     = {}
+  type = map(object({
+    id = string
+    timeouts = optional(object({
+      create = optional(string)
+      update = optional(string)
+      delete = optional(string)
+    }))
+  }))
+  default = {}
 }
 
 variable "route_table_association_timeouts" {
   description = "Create, update, and delete timeout configurations for route table association"
-  type        = map(string)
-  default     = {}
+  type = map(object({
+    create = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  }))
+  default = null
 }
 
 ################################################################################
@@ -323,40 +337,6 @@ variable "nat_gateway_connectivity_type" {
 
 variable "nat_gateway_tags" {
   description = "Additional tags for the NAT gateway"
-  type        = map(string)
-  default     = {}
-}
-
-################################################################################
-# Internet Gateway
-################################################################################
-
-variable "create_internet_gateway" {
-  description = "Controls if an internet gateway is created"
-  type        = bool
-  default     = true
-}
-
-variable "attach_internet_gateway" {
-  description = "Controls if an internet gateway is attached to the VPC"
-  type        = bool
-  default     = true
-}
-
-variable "internet_gateway_id" {
-  description = "The ID of an existing internet gateway to attach to the VPC. Reqiured if `create_internet_gateway` is `false` and `attach_internet_gateway` is `true`"
-  type        = string
-  default     = null
-}
-
-variable "create_egress_only_internet_gateway" {
-  description = "Controls if an egress only internet gateway is created"
-  type        = bool
-  default     = false
-}
-
-variable "internet_gateway_tags" {
-  description = "Additional tags for the internet gateway/egress only internet gateway"
   type        = map(string)
   default     = {}
 }

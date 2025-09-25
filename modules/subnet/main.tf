@@ -118,7 +118,7 @@ resource "aws_route" "this" {
   egress_only_gateway_id    = each.value.egress_only_gateway_id
   gateway_id                = each.value.gateway_id
   local_gateway_id          = each.value.local_gateway_id
-  nat_gateway_id            = each.value.nat_gateway_id
+  nat_gateway_id            = each.value.this_nat_gateway ? try(aws_nat_gateway.this[0].id) : each.value.nat_gateway_id
   network_interface_id      = each.value.network_interface_id
   transit_gateway_id        = each.value.transit_gateway_id
   vpc_endpoint_id           = each.value.vpc_endpoint_id
@@ -151,9 +151,9 @@ resource "aws_route_table_association" "gateway" {
     for_each = each.value.timeouts != null ? [each.value.timeouts] : []
 
     content {
-      create = each.value.create
-      update = each.value.update
-      delete = each.value.delete
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 }
@@ -170,9 +170,9 @@ resource "aws_route_table_association" "subnet" {
     for_each = var.route_table_association_timeouts != null ? [var.route_table_association_timeouts] : []
 
     content {
-      create = each.value.create
-      update = each.value.update
-      delete = each.value.delete
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 }
@@ -197,10 +197,6 @@ resource "aws_eip" "this" {
     var.tags,
     { Name = var.name },
   )
-
-  depends_on = [
-    aws_internet_gateway.this
-  ]
 }
 
 resource "aws_nat_gateway" "this" {
@@ -216,44 +212,5 @@ resource "aws_nat_gateway" "this" {
     var.tags,
     { Name = var.name },
     var.nat_gateway_tags,
-  )
-}
-
-################################################################################
-# Internet Gateway
-################################################################################
-
-resource "aws_internet_gateway" "this" {
-  count = var.create && var.create_internet_gateway ? 1 : 0
-
-  region = var.region
-
-  tags = merge(
-    var.tags,
-    { Name = var.name },
-    var.internet_gateway_tags,
-  )
-}
-
-resource "aws_internet_gateway_attachment" "this" {
-  count = var.create && var.attach_internet_gateway ? 1 : 0
-
-  region = var.region
-
-  vpc_id              = var.vpc_id
-  internet_gateway_id = var.create_internet_gateway ? aws_internet_gateway.this[0].id : var.internet_gateway_id
-}
-
-resource "aws_egress_only_internet_gateway" "this" {
-  count = var.create && var.create_egress_only_internet_gateway ? 1 : 0
-
-  region = var.region
-
-  vpc_id = var.vpc_id
-
-  tags = merge(
-    var.tags,
-    { Name = var.name },
-    var.internet_gateway_tags,
   )
 }
