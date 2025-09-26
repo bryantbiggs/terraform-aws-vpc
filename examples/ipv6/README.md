@@ -32,7 +32,8 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | ../.. | n/a |
+| <a name="module_vpc_dualstack"></a> [vpc\_dualstack](#module\_vpc\_dualstack) | ../.. | n/a |
+| <a name="module_vpc_ipv6_only"></a> [vpc\_ipv6\_only](#module\_vpc\_ipv6\_only) | ../.. | n/a |
 
 ## Resources
 
