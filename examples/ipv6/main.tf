@@ -22,7 +22,32 @@ locals {
 # VPC Module
 ################################################################################
 
-module "vpc" {
+module "vpc_ipv6_only" {
+  source = "../.."
+
+  name = local.name
+  cidr = local.vpc_cidr
+  azs  = local.azs
+
+  enable_ipv6 = true
+
+  public_subnet_ipv6_native    = true
+  public_subnet_ipv6_prefixes  = [0, 1, 2]
+  private_subnet_ipv6_native   = true
+  private_subnet_ipv6_prefixes = [3, 4, 5]
+
+  # RDS currently only supports dual-stack so IPv4 CIDRs will need to be provided for subnets
+  # database_subnet_ipv6_native   = true
+  # database_subnet_ipv6_prefixes = [6, 7, 8]
+
+  enable_nat_gateway     = false
+  create_egress_only_igw = true
+
+  tags = local.tags
+}
+
+
+module "vpc_dualstack" {
   source = "../.."
 
   name = local.name
