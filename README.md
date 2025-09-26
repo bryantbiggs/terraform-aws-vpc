@@ -207,7 +207,6 @@ module "vpc_cidr_from_ipam" {
 - [VPC w/ Flow Log](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/flow-log)
 - [VPC using IPAM](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/ipam)
 - [IPv6 VPC](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/ipv6) - one with dualstack IPv4/IPv6 and one with IPv6 only subnets
-- [VPC w/ Network ACL](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-acls)
 - [VPC w/ Network Firewall](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-firewall)
 - [VPC w/ Outpost](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/outpost)
 - [VPC w/ secondary CIDR blocks](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/secondary-cidr-blocks)
