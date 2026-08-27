@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.7.1](https://github.com/terraform-aws-modules/terraform-aws-vpc/compare/v6.7.0...v6.7.1) (2026-08-27)
+
+### Bug Fixes
+
+* Detect AZ IDs correctly for regions with multi-character prefixes (e.g. eusc-) ([#1301](https://github.com/terraform-aws-modules/terraform-aws-vpc/issues/1301)) ([bf0e762](https://github.com/terraform-aws-modules/terraform-aws-vpc/commit/bf0e762d8ffac9bfc473e52469244d1bb13dd014))
+
 ## [6.7.0](https://github.com/terraform-aws-modules/terraform-aws-vpc/compare/v6.6.1...v6.7.0) (2026-08-21)
 
 ### Features
