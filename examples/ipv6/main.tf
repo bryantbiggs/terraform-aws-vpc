@@ -130,5 +130,5 @@ module "vpc_dualstack" {
 module "disabled" {
   source = "../.."
 
-  create        = false
+  create = false
 }

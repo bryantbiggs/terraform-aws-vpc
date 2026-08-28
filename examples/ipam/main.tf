@@ -85,7 +85,7 @@ module "vpc_ipam_pinned_cidr" {
 module "disabled" {
   source = "../.."
 
-  create        = false
+  create = false
 }
 
 ################################################################################

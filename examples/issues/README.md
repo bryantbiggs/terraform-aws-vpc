@@ -23,28 +23,29 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.28 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.28 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
-| <a name="module_vpc_issue_108"></a> [vpc\_issue\_108](#module\_vpc\_issue\_108) | ../../ | n/a |
-| <a name="module_vpc_issue_44"></a> [vpc\_issue\_44](#module\_vpc\_issue\_44) | ../../ | n/a |
-| <a name="module_vpc_issue_46"></a> [vpc\_issue\_46](#module\_vpc\_issue\_46) | ../../ | n/a |
+| ---- | ------ | ------- |
+| <a name="module_asymmetrical_subnets"></a> [asymmetrical\_subnets](#module\_asymmetrical\_subnets) | ../../ | n/a |
+| <a name="module_disabled"></a> [disabled](#module\_disabled) | ../../ | n/a |
+| <a name="module_no_private_subnets"></a> [no\_private\_subnets](#module\_no\_private\_subnets) | ../../ | n/a |
+| <a name="module_overlapping_public_subnets"></a> [overlapping\_public\_subnets](#module\_overlapping\_public\_subnets) | ../../ | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs

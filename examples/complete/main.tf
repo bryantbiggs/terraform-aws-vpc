@@ -432,7 +432,7 @@ module "vpc_endpoints" {
 module "vpc_endpoints_existing_sg" {
   source = "../../modules/vpc-endpoints"
 
-  vpc_id     = module.vpc.vpc_id
+  vpc_id     = module.vpc.id
   subnet_ids = module.vpc.private_subnets
 
   create_security_group = true
@@ -463,7 +463,7 @@ module "vpc_endpoints_nocreate" {
 module "disabled" {
   source = "../../"
 
-  create        = false
+  create = false
 }
 
 ################################################################################

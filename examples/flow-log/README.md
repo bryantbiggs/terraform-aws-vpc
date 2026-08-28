@@ -48,9 +48,6 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 | <a name="module_flow_log_subnet"></a> [flow\_log\_subnet](#module\_flow\_log\_subnet) | ../../modules/flow-log | n/a |
 | <a name="module_s3_bucket"></a> [s3\_bucket](#module\_s3\_bucket) | terraform-aws-modules/s3-bucket/aws | ~> 5.0 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ../../ | n/a |
-| <a name="module_vpc_flow_log_cloudwatch"></a> [vpc\_flow\_log\_cloudwatch](#module\_vpc\_flow\_log\_cloudwatch) | ../../ | n/a |
-| <a name="module_vpc_flow_log_cloudwatch_external"></a> [vpc\_flow\_log\_cloudwatch\_external](#module\_vpc\_flow\_log\_cloudwatch\_external) | ../../ | n/a |
-| <a name="module_vpc_flow_log_s3"></a> [vpc\_flow\_log\_s3](#module\_vpc\_flow\_log\_s3) | ../../ | n/a |
 
 ## Resources
 

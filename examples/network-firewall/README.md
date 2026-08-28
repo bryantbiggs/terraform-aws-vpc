@@ -16,20 +16,20 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_firewall_subnet"></a> [firewall\_subnet](#module\_firewall\_subnet) | ../../modules/subnet | n/a |
 | <a name="module_network_firewall"></a> [network\_firewall](#module\_network\_firewall) | terraform-aws-modules/network-firewall/aws | ~> 1.0 |
 | <a name="module_public_subnet"></a> [public\_subnet](#module\_public\_subnet) | ../../modules/subnet | n/a |
@@ -38,7 +38,7 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs
@@ -48,7 +48,7 @@ No inputs.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_azs"></a> [azs](#output\_azs) | A list of availability zones specified as argument to this module |
 | <a name="output_customer_gateways"></a> [customer\_gateways](#output\_customer\_gateways) | Map of Customer Gateway's created and their attributes |
 | <a name="output_database_network_acl_arn"></a> [database\_network\_acl\_arn](#output\_database\_network\_acl\_arn) | ARN of the database network ACL |

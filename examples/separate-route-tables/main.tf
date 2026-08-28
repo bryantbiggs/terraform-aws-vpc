@@ -53,5 +53,5 @@ module "vpc" {
 module "disabled" {
   source = "../../"
 
-  create        = false
+  create = false
 }
