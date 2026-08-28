@@ -139,25 +139,6 @@ resource "aws_route" "this" {
 # Route Table Association
 ################################################################################
 
-resource "aws_route_table_association" "gateway" {
-  for_each = { for k, v in var.associated_gateways : k => v if var.create && var.create_route_table }
-
-  region = var.region
-
-  gateway_id     = each.value.id
-  route_table_id = aws_route_table.this[0].id
-
-  dynamic "timeouts" {
-    for_each = each.value.timeouts != null ? [each.value.timeouts] : []
-
-    content {
-      create = timeouts.value.create
-      update = timeouts.value.update
-      delete = timeouts.value.delete
-    }
-  }
-}
-
 resource "aws_route_table_association" "subnet" {
   count = var.create ? 1 : 0
 

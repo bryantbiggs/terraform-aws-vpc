@@ -4,7 +4,6 @@ module "wrapper" {
   for_each = var.items
 
   assign_ipv6_address_on_creation                = try(each.value.assign_ipv6_address_on_creation, var.defaults.assign_ipv6_address_on_creation, null)
-  associated_gateways                            = try(each.value.associated_gateways, var.defaults.associated_gateways, {})
   availability_zone                              = try(each.value.availability_zone, var.defaults.availability_zone, null)
   availability_zone_id                           = try(each.value.availability_zone_id, var.defaults.availability_zone_id, null)
   cidr_reservations                              = try(each.value.cidr_reservations, var.defaults.cidr_reservations, {})

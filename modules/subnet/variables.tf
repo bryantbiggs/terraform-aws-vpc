@@ -254,19 +254,6 @@ variable "route_timeouts" {
 # Route Table Association
 ################################################################################
 
-variable "associated_gateways" {
-  description = "Map of gateways to associate with the route table"
-  type = map(object({
-    id = string
-    timeouts = optional(object({
-      create = optional(string)
-      update = optional(string)
-      delete = optional(string)
-    }))
-  }))
-  default = {}
-}
-
 variable "route_table_association_timeouts" {
   description = "Create, update, and delete timeout configurations for route table association"
   type = object({
