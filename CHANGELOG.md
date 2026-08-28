@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.7.2](https://github.com/terraform-aws-modules/terraform-aws-vpc/compare/v6.7.1...v6.7.2) (2026-08-28)
+
+### Bug Fixes
+
+* Stop apply failing on DNS64 without IPv6 and on empty route table lists ([#1306](https://github.com/terraform-aws-modules/terraform-aws-vpc/issues/1306)) ([e0c733a](https://github.com/terraform-aws-modules/terraform-aws-vpc/commit/e0c733a7231d9aee4b1307caabe55103548d67ae))
+
 ## [6.7.1](https://github.com/terraform-aws-modules/terraform-aws-vpc/compare/v6.7.0...v6.7.1) (2026-08-27)
 
 ### Bug Fixes
