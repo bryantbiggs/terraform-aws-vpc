@@ -214,6 +214,44 @@ module "vpc_cidr_from_ipam" {
 }
 ```
 
+## Composable subnets
+
+The root module creates subnets from positional lists (`public_subnets`, `private_subnets`, and so on),
+which means the routes attached to them are decided by the module rather than by the caller. That is
+sufficient for common topologies but leaves no room for cases such as sending the public default route
+through a firewall endpoint instead of the internet gateway.
+
+The [subnet](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/modules/subnet)
+sub-module creates a single subnet, its route table, and its routes, so callers compose whatever
+topology they need with `for_each`:
+
+```hcl
+module "public_subnet" {
+  source = "terraform-aws-modules/vpc/aws//modules/subnet"
+
+  for_each = local.public_subnets
+
+  name              = "example-public-${each.key}"
+  vpc_id            = module.vpc.vpc_id
+  availability_zone = each.key
+  ipv4_cidr_block   = each.value
+
+  routes = {
+    firewall-endpoint = {
+      destination_ipv4_cidr_block = "0.0.0.0/0"
+      vpc_endpoint_id             = local.firewall_endpoints[each.key].endpoint_id
+    }
+  }
+}
+```
+
+Because `routes` is a map, a route is omitted by leaving it out rather than by adding a toggle to the
+root module. See the [network firewall example](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-firewall)
+for a full topology.
+
+This sub-module is additive and does not change the root module. It is also the composition model the
+module is moving toward, so configuration written against it now carries forward.
+
 ## Examples
 
 - [Block Public Access](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/block-public-access)
@@ -225,6 +263,7 @@ module "vpc_cidr_from_ipam" {
 - [IPv6 only subnets VPC](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/ipv6-only)
 - [Manage Default VPC](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/manage-default-vpc)
 - [VPC w/ Network ACL](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-acls)
+- [VPC w/ Network Firewall](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-firewall) w/ composable subnets
 - [VPC w/ Outpost](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/outpost)
 - [VPC w/ secondary CIDR blocks](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/secondary-cidr-blocks)
 - [VPC w/ unique route tables](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/separate-route-tables)
