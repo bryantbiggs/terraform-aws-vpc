@@ -10,7 +10,7 @@ module "wrapper" {
   cidr_reservations                              = try(each.value.cidr_reservations, var.defaults.cidr_reservations, {})
   create                                         = try(each.value.create, var.defaults.create, true)
   create_eip                                     = try(each.value.create_eip, var.defaults.create_eip, true)
-  create_nat_gateway                             = try(each.value.create_nat_gateway, var.defaults.create_nat_gateway, true)
+  create_nat_gateway                             = try(each.value.create_nat_gateway, var.defaults.create_nat_gateway, false)
   create_route_table                             = try(each.value.create_route_table, var.defaults.create_route_table, true)
   customer_owned_ipv4_pool                       = try(each.value.customer_owned_ipv4_pool, var.defaults.customer_owned_ipv4_pool, null)
   eip_address                                    = try(each.value.eip_address, var.defaults.eip_address, null)

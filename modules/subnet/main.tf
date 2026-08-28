@@ -28,8 +28,8 @@ resource "aws_subnet" "this" {
     for_each = var.timeouts != null ? [var.timeouts] : []
 
     content {
-      create = each.value.create
-      delete = each.value.delete
+      create = timeouts.value.create
+      delete = timeouts.value.delete
     }
   }
 
@@ -84,9 +84,9 @@ resource "aws_route_table" "this" {
     for_each = var.route_table_timeouts != null ? [var.route_table_timeouts] : []
 
     content {
-      create = each.value.create
-      update = each.value.update
-      delete = each.value.delete
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 
@@ -118,7 +118,7 @@ resource "aws_route" "this" {
   egress_only_gateway_id    = each.value.egress_only_gateway_id
   gateway_id                = each.value.gateway_id
   local_gateway_id          = each.value.local_gateway_id
-  nat_gateway_id            = each.value.this_nat_gateway ? try(aws_nat_gateway.this[0].id) : each.value.nat_gateway_id
+  nat_gateway_id            = each.value.this_nat_gateway ? try(aws_nat_gateway.this[0].id, null) : each.value.nat_gateway_id
   network_interface_id      = each.value.network_interface_id
   transit_gateway_id        = each.value.transit_gateway_id
   vpc_endpoint_id           = each.value.vpc_endpoint_id
@@ -128,9 +128,9 @@ resource "aws_route" "this" {
     for_each = var.route_timeouts != null ? [var.route_timeouts] : []
 
     content {
-      create = each.value.create
-      update = each.value.update
-      delete = each.value.delete
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 }
@@ -166,6 +166,13 @@ resource "aws_route_table_association" "subnet" {
   subnet_id      = aws_subnet.this[0].id
   route_table_id = var.create_route_table ? aws_route_table.this[0].id : var.route_table_id
 
+  lifecycle {
+    precondition {
+      condition     = var.create_route_table || var.route_table_id != null
+      error_message = "`route_table_id` is required when `create_route_table` is `false`."
+    }
+  }
+
   dynamic "timeouts" {
     for_each = var.route_table_association_timeouts != null ? [var.route_table_association_timeouts] : []
 
@@ -182,7 +189,7 @@ resource "aws_route_table_association" "subnet" {
 ################################################################################
 
 resource "aws_eip" "this" {
-  count = var.create && var.create_nat_gateway && var.create_eip ? 1 : 0
+  count = var.create && var.create_nat_gateway && var.create_eip && var.nat_gateway_connectivity_type != "private" ? 1 : 0
 
   region = var.region
 
@@ -204,7 +211,8 @@ resource "aws_nat_gateway" "this" {
 
   region = var.region
 
-  allocation_id     = var.create_eip ? aws_eip.this[0].id : var.nat_gateway_allocation_id
+  # A private NAT gateway must not be given an allocation
+  allocation_id     = var.nat_gateway_connectivity_type == "private" ? null : var.create_eip ? aws_eip.this[0].id : var.nat_gateway_allocation_id
   connectivity_type = var.nat_gateway_connectivity_type
   subnet_id         = aws_subnet.this[0].id
 

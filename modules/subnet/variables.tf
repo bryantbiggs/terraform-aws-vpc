@@ -269,11 +269,11 @@ variable "associated_gateways" {
 
 variable "route_table_association_timeouts" {
   description = "Create, update, and delete timeout configurations for route table association"
-  type = map(object({
+  type = object({
     create = optional(string)
     update = optional(string)
     delete = optional(string)
-  }))
+  })
   default = null
 }
 
@@ -284,7 +284,7 @@ variable "route_table_association_timeouts" {
 variable "create_nat_gateway" {
   description = "Controls if a NAT gateway should be created"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_eip" {
