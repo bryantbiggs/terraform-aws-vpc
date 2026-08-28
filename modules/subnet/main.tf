@@ -66,6 +66,13 @@ resource "aws_ram_resource_association" "this" {
 
   resource_arn       = aws_subnet.this[0].arn
   resource_share_arn = var.resource_share_arn
+
+  lifecycle {
+    precondition {
+      condition     = var.resource_share_arn != null
+      error_message = "`resource_share_arn` is required when `share_subnet` is `true`."
+    }
+  }
 }
 
 ################################################################################

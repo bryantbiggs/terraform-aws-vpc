@@ -57,9 +57,14 @@ variable "map_public_ip_on_launch" {
 }
 
 variable "private_dns_hostname_type_on_launch" {
-  description = "The type of hostnames to assign to instances in the subnet at launch. For IPv6-only subnets, an instance DNS name must be based on the instance ID. For dual-stack and IPv4-only subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID"
+  description = "The type of hostnames to assign to instances in the subnet at launch. For IPv6-only subnets, an instance DNS name must be based on the instance ID. For dual-stack and IPv4-only subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID. Valid values are `ip-name` and `resource-name`"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.private_dns_hostname_type_on_launch == null ? true : contains(["ip-name", "resource-name"], var.private_dns_hostname_type_on_launch)
+    error_message = "`private_dns_hostname_type_on_launch` must be either `ip-name` or `resource-name`."
+  }
 }
 
 variable "ipv4_cidr_block" {
@@ -150,6 +155,11 @@ variable "cidr_reservations" {
   }))
   default  = {}
   nullable = false
+
+  validation {
+    condition     = alltrue([for r in var.cidr_reservations : contains(["explicit", "prefix"], r.reservation_type)])
+    error_message = "`reservation_type` must be either `explicit` or `prefix`."
+  }
 }
 
 ################################################################################
@@ -327,6 +337,11 @@ variable "nat_gateway_connectivity_type" {
   description = "Connectivity type for the gateway. Valid values are `private` and `public`. Defaults to `public`"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.nat_gateway_connectivity_type == null ? true : contains(["private", "public"], var.nat_gateway_connectivity_type)
+    error_message = "`nat_gateway_connectivity_type` must be either `private` or `public`."
+  }
 }
 
 variable "nat_gateway_tags" {
