@@ -33,7 +33,7 @@ Two constraints shape the layout:
 - The internet gateway route table [must be dedicated to the gateway and associated with
   no subnet](https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html).
   The `subnet` sub-module always associates the route table it creates with its own
-  subnet, so this example creates that route table directly.
+  subnet, so this example uses the `gateway-route-table` sub-module for it.
 - A firewall subnet [should not carry any other traffic](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/using-nat-gateway-with-firewall.html),
   because Network Firewall cannot inspect traffic whose source or destination is inside a
   firewall subnet. Nothing else is placed in them here.
@@ -63,6 +63,7 @@ References:
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_firewall_subnet"></a> [firewall\_subnet](#module\_firewall\_subnet) | ../../modules/subnet | n/a |
+| <a name="module_igw_ingress"></a> [igw\_ingress](#module\_igw\_ingress) | ../../modules/gateway-route-table | n/a |
 | <a name="module_network_firewall"></a> [network\_firewall](#module\_network\_firewall) | terraform-aws-modules/network-firewall/aws | ~> 1.0 |
 | <a name="module_public_subnet"></a> [public\_subnet](#module\_public\_subnet) | ../../modules/subnet | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ../../ | n/a |
@@ -72,9 +73,6 @@ References:
 | Name | Type |
 | ---- | ---- |
 | [aws_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
-| [aws_route.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
-| [aws_route_table.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
-| [aws_route_table_association.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs

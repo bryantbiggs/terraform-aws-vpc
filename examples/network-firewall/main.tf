@@ -113,33 +113,31 @@ module "firewall_subnet" {
 
 # Without this, inbound traffic goes straight from the internet gateway into the public
 # subnets and never reaches the firewall, while outbound traffic does. The firewall then
-# sees only one direction of every connection, which a stateful engine cannot evaluate.
+# sees only one direction of each connection, which a stateful engine cannot evaluate.
 #
-# AWS requires this route table to be dedicated to the gateway and associated with no
-# subnet, so the subnet sub-module cannot create it: that module always associates the
-# route table it creates with its own subnet
+# This route table is associated with the gateway and with no subnet, which is why it
+# comes from the gateway-route-table sub-module rather than the subnet sub-module
 #
 # Route table layout: https://docs.aws.amazon.com/network-firewall/latest/developerguide/arch-two-zone-igw.html
 # Dedicated gateway route table: https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html
-resource "aws_route_table" "igw_ingress" {
+module "igw_ingress" {
+  source = "../../modules/gateway-route-table"
+
+  name   = "${local.name}-igw-ingress"
   vpc_id = module.vpc.vpc_id
 
-  tags = merge(local.tags, { Name = "${local.name}-igw-ingress" })
-}
+  gateway_id = aws_internet_gateway.this.id
 
-resource "aws_route_table_association" "igw_ingress" {
-  gateway_id     = aws_internet_gateway.this.id
-  route_table_id = aws_route_table.igw_ingress.id
-}
+  # Traffic destined for each public subnet is sent to the firewall endpoint in that
+  # subnet's own availability zone, which is what keeps the flow symmetric
+  routes = { for az, cidr in local.public_subnets :
+    az => {
+      destination_ipv4_cidr_block = cidr
+      vpc_endpoint_id             = local.firewall_endpoints[az].endpoint_id
+    }
+  }
 
-# Traffic destined for each public subnet is sent to the firewall endpoint in that
-# subnet's own availability zone, which is what keeps the flow symmetric
-resource "aws_route" "igw_ingress" {
-  for_each = local.public_subnets
-
-  route_table_id         = aws_route_table.igw_ingress.id
-  destination_cidr_block = each.value
-  vpc_endpoint_id        = local.firewall_endpoints[each.key].endpoint_id
+  tags = local.tags
 }
 
 ################################################################################

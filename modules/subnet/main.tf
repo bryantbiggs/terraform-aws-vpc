@@ -125,7 +125,7 @@ resource "aws_route" "this" {
   vpc_peering_connection_id = each.value.vpc_peering_connection_id
 
   dynamic "timeouts" {
-    for_each = var.route_timeouts != null ? [var.route_timeouts] : []
+    for_each = each.value.timeouts != null ? [each.value.timeouts] : var.route_timeouts != null ? [var.route_timeouts] : []
 
     content {
       create = timeouts.value.create
