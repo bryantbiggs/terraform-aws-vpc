@@ -17,6 +17,7 @@ module "wrapper" {
   eip_customer_owned_ipv4_pool                   = try(each.value.eip_customer_owned_ipv4_pool, var.defaults.eip_customer_owned_ipv4_pool, null)
   eip_network_border_group                       = try(each.value.eip_network_border_group, var.defaults.eip_network_border_group, null)
   eip_public_ipv4_pool                           = try(each.value.eip_public_ipv4_pool, var.defaults.eip_public_ipv4_pool, null)
+  eip_tags                                       = try(each.value.eip_tags, var.defaults.eip_tags, {})
   enable_dns64                                   = try(each.value.enable_dns64, var.defaults.enable_dns64, null)
   enable_lni_at_device_index                     = try(each.value.enable_lni_at_device_index, var.defaults.enable_lni_at_device_index, null)
   enable_resource_name_dns_a_record_on_launch    = try(each.value.enable_resource_name_dns_a_record_on_launch, var.defaults.enable_resource_name_dns_a_record_on_launch, null)
@@ -45,5 +46,5 @@ module "wrapper" {
   subnet_tags                                    = try(each.value.subnet_tags, var.defaults.subnet_tags, {})
   tags                                           = try(each.value.tags, var.defaults.tags, {})
   timeouts                                       = try(each.value.timeouts, var.defaults.timeouts, null)
-  vpc_id                                         = try(each.value.vpc_id, var.defaults.vpc_id, "")
+  vpc_id                                         = try(each.value.vpc_id, var.defaults.vpc_id, null)
 }

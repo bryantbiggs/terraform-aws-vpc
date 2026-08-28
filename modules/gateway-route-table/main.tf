@@ -21,7 +21,7 @@ resource "aws_route_table" "this" {
 
   tags = merge(
     var.tags,
-    { Name = var.name },
+    { for k, v in { Name = var.name } : k => v if v != "" },
     var.route_table_tags,
   )
 }
@@ -80,7 +80,7 @@ resource "aws_route_table_association" "this" {
   route_table_id = aws_route_table.this[0].id
 
   dynamic "timeouts" {
-    for_each = var.association_timeouts != null ? [var.association_timeouts] : []
+    for_each = var.route_table_association_timeouts != null ? [var.route_table_association_timeouts] : []
 
     content {
       create = timeouts.value.create

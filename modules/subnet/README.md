@@ -141,6 +141,7 @@ No modules.
 | <a name="input_eip_customer_owned_ipv4_pool"></a> [eip\_customer\_owned\_ipv4\_pool](#input\_eip\_customer\_owned\_ipv4\_pool) | ID of a customer-owned address pool | `string` | `null` | no |
 | <a name="input_eip_network_border_group"></a> [eip\_network\_border\_group](#input\_eip\_network\_border\_group) | Location from which the IP address is advertised. Use this parameter to limit the address to this location | `string` | `null` | no |
 | <a name="input_eip_public_ipv4_pool"></a> [eip\_public\_ipv4\_pool](#input\_eip\_public\_ipv4\_pool) | EC2 IPv4 address pool identifier or `amazon` | `string` | `null` | no |
+| <a name="input_eip_tags"></a> [eip\_tags](#input\_eip\_tags) | Additional tags for the Elastic IP created for the NAT gateway | `map(string)` | `{}` | no |
 | <a name="input_enable_dns64"></a> [enable\_dns64](#input\_enable\_dns64) | Indicates whether DNS queries made to the Amazon-provided DNS Resolver in this subnet should return synthetic IPv6 addresses for IPv4-only destinations | `bool` | `null` | no |
 | <a name="input_enable_lni_at_device_index"></a> [enable\_lni\_at\_device\_index](#input\_enable\_lni\_at\_device\_index) | Indicates the device position for local network interfaces in this subnet | `number` | `null` | no |
 | <a name="input_enable_resource_name_dns_a_record_on_launch"></a> [enable\_resource\_name\_dns\_a\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_a\_record\_on\_launch) | Indicates whether to respond to DNS queries for instance hostnames with DNS A records | `bool` | `null` | no |
@@ -169,7 +170,7 @@ No modules.
 | <a name="input_subnet_tags"></a> [subnet\_tags](#input\_subnet\_tags) | Additional tags for the subnet | `map(string)` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Create and delete timeout configurations for subnet | <pre>object({<br/>    create = optional(string)<br/>    delete = optional(string)<br/>  })</pre> | `null` | no |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC the resources are created within | `string` | `""` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC the resources are created within | `string` | `null` | no |
 
 ## Outputs
 

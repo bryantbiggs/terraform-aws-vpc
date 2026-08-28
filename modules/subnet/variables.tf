@@ -25,7 +25,7 @@ variable "tags" {
 variable "vpc_id" {
   description = "The ID of the VPC the resources are created within"
   type        = string
-  default     = ""
+  default     = null
 }
 
 ################################################################################
@@ -308,6 +308,13 @@ variable "eip_public_ipv4_pool" {
   description = "EC2 IPv4 address pool identifier or `amazon`"
   type        = string
   default     = null
+}
+
+variable "eip_tags" {
+  description = "Additional tags for the Elastic IP created for the NAT gateway"
+  type        = map(string)
+  default     = {}
+  nullable    = false
 }
 
 variable "nat_gateway_allocation_id" {

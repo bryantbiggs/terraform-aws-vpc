@@ -25,7 +25,7 @@ variable "tags" {
 variable "vpc_id" {
   description = "The ID of the VPC the resources are created within"
   type        = string
-  default     = ""
+  default     = null
 }
 
 ################################################################################
@@ -99,7 +99,7 @@ variable "gateway_id" {
   default     = null
 }
 
-variable "association_timeouts" {
+variable "route_table_association_timeouts" {
   description = "Create, update, and delete timeout configurations for the gateway association"
   type = object({
     create = optional(string)

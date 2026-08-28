@@ -35,8 +35,8 @@ resource "aws_subnet" "this" {
 
   tags = merge(
     var.tags,
+    { for k, v in { Name = var.name } : k => v if v != "" },
     var.subnet_tags,
-    { Name = var.name },
   )
 }
 
@@ -92,7 +92,7 @@ resource "aws_route_table" "this" {
 
   tags = merge(
     var.tags,
-    { Name = var.name },
+    { for k, v in { Name = var.name } : k => v if v != "" },
     var.route_table_tags,
   )
 }
@@ -183,7 +183,8 @@ resource "aws_eip" "this" {
 
   tags = merge(
     var.tags,
-    { Name = var.name },
+    { for k, v in { Name = var.name } : k => v if v != "" },
+    var.eip_tags,
   )
 }
 
@@ -199,7 +200,7 @@ resource "aws_nat_gateway" "this" {
 
   tags = merge(
     var.tags,
-    { Name = var.name },
+    { for k, v in { Name = var.name } : k => v if v != "" },
     var.nat_gateway_tags,
   )
 }
