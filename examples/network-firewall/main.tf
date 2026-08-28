@@ -11,8 +11,10 @@ locals {
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
-  public_subnets   = zipmap(["a", "b", "c"], [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 4)])
-  firewall_subnets = zipmap(["a", "b", "c"], [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 8)])
+  # Keyed by availability zone name, which is what the firewall reports its endpoints
+  # against, so the two line up without reconstructing zone names from the region
+  public_subnets   = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i + 4) }
+  firewall_subnets = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i + 8) }
 
   tags = {
     Example    = local.name
@@ -66,17 +68,13 @@ locals {
 module "public_subnet" {
   source = "../../modules/subnet"
 
-  for_each = { for k, v in local.public_subnets :
-    "${local.region}${k}" => {
-      ipv4_cidr_block = v
-    }
-  }
+  for_each = local.public_subnets
 
   name   = "${local.name}-public-${each.key}"
   vpc_id = module.vpc.vpc_id
 
   availability_zone = each.key
-  ipv4_cidr_block   = each.value.ipv4_cidr_block
+  ipv4_cidr_block   = each.value
 
   routes = {
     firewall-endpoint = {
@@ -91,17 +89,13 @@ module "public_subnet" {
 module "firewall_subnet" {
   source = "../../modules/subnet"
 
-  for_each = { for k, v in local.firewall_subnets :
-    "${local.region}${k}" => {
-      ipv4_cidr_block = v
-    }
-  }
+  for_each = local.firewall_subnets
 
   name   = "${local.name}-firewall-${each.key}"
   vpc_id = module.vpc.vpc_id
 
   availability_zone = each.key
-  ipv4_cidr_block   = each.value.ipv4_cidr_block
+  ipv4_cidr_block   = each.value
 
   routes = {
     igw = {
@@ -145,7 +139,7 @@ resource "aws_route" "igw_ingress" {
 
   route_table_id         = aws_route_table.igw_ingress.id
   destination_cidr_block = each.value
-  vpc_endpoint_id        = local.firewall_endpoints["${local.region}${each.key}"].endpoint_id
+  vpc_endpoint_id        = local.firewall_endpoints[each.key].endpoint_id
 }
 
 ################################################################################
