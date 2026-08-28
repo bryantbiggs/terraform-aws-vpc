@@ -41,6 +41,11 @@ output "route_table_arn" {
   value       = try(aws_route_table.this[0].arn, null)
 }
 
+output "route_table_association_id" {
+  description = "The ID of the association between the route table and the subnet"
+  value       = try(aws_route_table_association.subnet[0].id, null)
+}
+
 output "route_table_owner_id" {
   description = "The ID of the AWS account that owns the route table"
   value       = try(aws_route_table.this[0].owner_id, null)

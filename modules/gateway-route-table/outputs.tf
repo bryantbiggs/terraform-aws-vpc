@@ -30,7 +30,7 @@ output "routes" {
 # Gateway Association
 ################################################################################
 
-output "association_id" {
+output "route_table_association_id" {
   description = "The ID of the association between the route table and the gateway"
   value       = try(aws_route_table_association.this[0].id, null)
 }
