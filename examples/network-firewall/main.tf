@@ -38,6 +38,19 @@ module "vpc" {
 }
 
 ################################################################################
+# Internet Gateway
+################################################################################
+
+# The VPC module creates an internet gateway only when it is also managing public
+# subnets. This example composes its own public subnets through the subnet sub-module,
+# so it owns the gateway as well
+resource "aws_internet_gateway" "this" {
+  vpc_id = module.vpc.vpc_id
+
+  tags = merge(local.tags, { Name = local.name })
+}
+
+################################################################################
 # Subnet(s)
 ################################################################################
 
@@ -93,7 +106,7 @@ module "firewall_subnet" {
   routes = {
     igw = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      gateway_id                  = module.vpc.igw_id
+      gateway_id                  = aws_internet_gateway.this.id
     }
   }
 
