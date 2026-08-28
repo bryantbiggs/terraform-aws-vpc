@@ -249,6 +249,12 @@ Because `routes` is a map, a route is omitted by leaving it out rather than by a
 root module. See the [network firewall example](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-firewall)
 for a full topology.
 
+The sub-module deliberately does not create gateway route tables. A route table associated with an
+internet gateway [must be dedicated to that gateway and associated with no subnet](https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html),
+whereas every route table this sub-module creates is associated with its own subnet. Create those
+directly with `aws_route_table` and `aws_route_table_association`, as the network firewall example
+does.
+
 This sub-module is additive and does not change the root module. It is also the composition model the
 module is moving toward, so configuration written against it now carries forward.
 

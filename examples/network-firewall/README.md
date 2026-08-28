@@ -12,6 +12,38 @@ $ terraform apply
 
 Note that this example may create resources which can cost money (AWS Elastic IP, for example). Run `terraform destroy` when you don't need these resources.
 
+## Architecture
+
+Each availability zone gets a firewall subnet and a public subnet. Three route tables are
+involved, and all three are required for traffic to be inspected in both directions:
+
+| Route table | Entry | Purpose |
+| ----------- | ----- | ------- |
+| Internet gateway (edge) | public subnet CIDR to the firewall endpoint in the same AZ | Inbound traffic reaches the firewall before the workload |
+| Firewall subnet | `0.0.0.0/0` to the internet gateway | Inspected outbound traffic leaves the VPC |
+| Public subnet | `0.0.0.0/0` to the firewall endpoint in the same AZ | Outbound traffic reaches the firewall |
+
+Omitting the internet gateway route table is a common mistake. Outbound traffic still
+flows through the firewall, so a plan looks correct, but inbound traffic is delivered
+straight from the internet gateway to the public subnet. The firewall then sees only one
+direction of each connection, which a stateful engine cannot evaluate.
+
+Two constraints shape the layout:
+
+- The internet gateway route table [must be dedicated to the gateway and associated with
+  no subnet](https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html).
+  The `subnet` sub-module always associates the route table it creates with its own
+  subnet, so this example creates that route table directly.
+- A firewall subnet [should not carry any other traffic](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/using-nat-gateway-with-firewall.html),
+  because Network Firewall cannot inspect traffic whose source or destination is inside a
+  firewall subnet. Nothing else is placed in them here.
+
+References:
+
+- [Multi zone architecture with an internet gateway](https://docs.aws.amazon.com/network-firewall/latest/developerguide/arch-two-zone-igw.html)
+- [AWS Network Firewall example architectures with routing](https://docs.aws.amazon.com/network-firewall/latest/developerguide/architectures.html)
+- [Route internet traffic to a single network interface](https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html)
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -40,6 +72,9 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 | Name | Type |
 | ---- | ---- |
 | [aws_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
+| [aws_route.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route_table.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
+| [aws_route_table_association.igw_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs
