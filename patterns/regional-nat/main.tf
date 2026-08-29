@@ -30,6 +30,13 @@ module "vpc" {
 
   azs = local.azs
 
+  # a regional NAT gateway needs no public subnet, but the VPC still needs a gateway:
+  # AWS gives the NAT gateway its own route table, pre-configured with a route to it
+  create_igw = true
+
+  # scoped to the VPC rather than to a subnet, so it has no subnet to sit in
+  create_regional_nat_gateway = true
+
   tags = local.tags
 }
 

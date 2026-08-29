@@ -48,6 +48,7 @@ resource "aws_route" "this" {
   gateway_id                = each.value.gateway_id
   local_gateway_id          = each.value.local_gateway_id
   nat_gateway_id            = each.value.nat_gateway_id
+  odb_network_arn           = each.value.odb_network_arn
   network_interface_id      = each.value.network_interface_id
   transit_gateway_id        = each.value.transit_gateway_id
   vpc_endpoint_id           = each.value.vpc_endpoint_id
