@@ -31,7 +31,7 @@ module "vpc" {
   # composing subnets outside the module, so ask for the gateway explicitly
   create_igw = true
 
-  enable_ipv6        = true
+  enable_ipv6            = true
   create_egress_only_igw = true
 
   tags = local.tags
@@ -55,6 +55,26 @@ module "public_subnet" {
   routes = {
     igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
   }
+
+  tags = local.tags
+}
+
+################################################################################
+# Transit gateway attachment subnets
+#
+# Dedicated subnets for the attachment. Attaching to the private subnets instead would
+# be circular: the private route table needs the transit gateway, and the attachment
+# would need the private subnets
+################################################################################
+
+module "attachment_subnet" {
+  source   = "../../modules/subnet"
+  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 12, i + 4080) }
+
+  name              = "${local.name}-tgw-${each.key}"
+  vpc_id            = module.vpc.vpc_id
+  availability_zone = each.key
+  ipv4_cidr_block   = each.value
 
   tags = local.tags
 }
@@ -120,7 +140,7 @@ module "transit_gateway" {
   vpc_attachments = {
     this = {
       vpc_id     = module.vpc.vpc_id
-      subnet_ids = [for k, v in module.private_subnet : v.id]
+      subnet_ids = [for k, v in module.attachment_subnet : v.id]
     }
   }
 
