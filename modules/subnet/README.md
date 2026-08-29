@@ -6,90 +6,91 @@ This module is designed to create a set of one or more subnets that serve a desi
 
 ## Usage
 
-See [`examples`](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples) directory for working examples to reference:
+This sub-module creates a **single** subnet, together with its route table, its routes and
+optionally a NAT gateway. Callers compose several with `for_each`, which is what lets a
+subnet group be any shape rather than one of a fixed set of tiers.
 
-### Public Subnets
+See the [patterns](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/patterns)
+directory for complete architectures built from it.
+
+### A subnet that owns its route table
 
 ```hcl
-module "public_subnets" {
+module "public" {
   source = "terraform-aws-modules/vpc/aws//modules/subnet"
 
-  name   = "example-public"
-  vpc_id = "vpc-12345678"
+  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i) }
 
-  subnets = {
-    "us-east-1a" = {
-      cidr_block         = "10.98.1.0/24"
-      availability_zone  = "us-east-1a"
-      create_nat_gateway = true
-    }
-    "us-east-1b" = {
-      cidr_block         = "10.98.2.0/24"
-      availability_zone  = "us-east-1b"
-      create_nat_gateway = true
-    }
-    "us-east-1c" = {
-      cidr_block         = "10.98.3.0/24"
-      availability_zone  = "us-east-1a"
-      create_nat_gateway = true
-    }
-  }
+  name              = "example-public-${each.key}"
+  vpc_id            = module.vpc.vpc_id
+  availability_zone = each.key
+  ipv4_cidr_block   = each.value
 
-  route_tables = {
-    shared = {
-      associated_subnet_keys = ["us-east-1a", "us-east-1a", "us-east-1c"]
-      routes = {
-        igw = {
-          destination_cidr_block = "0.0.0.0/0"
-          gateway_id             = "igw-1ff7a07b"
-        }
-      }
-    }
-  }
+  map_public_ip_on_launch = true
 
-  ingress_network_acl_rules = {
-    100 = {
-      protocol    = "-1"
-      rule_action = "Allow"
-      cidr_block  = "0.0.0.0/0"
-      from_port   = 0
-      to_port     = 0
+  routes = {
+    igw = {
+      destination_ipv4_cidr_block = "0.0.0.0/0"
+      gateway_id                  = module.vpc.igw_id
     }
-  }
-
-  egress_network_acl_rules = {
-    100 = {
-      protocol    = "-1"
-      rule_action = "Allow"
-      cidr_block  = "0.0.0.0/0"
-      from_port   = 0
-      to_port     = 0
-    }
-  }
-
-  tags = {
-    Owner       = "user"
-    Environment = "dev"
   }
 }
 ```
 
-### Private Subnets
+### Subnets sharing one route table
+
+Routes that are identical for every subnet do not need a table each. Create the table with
+the [route-table](../route-table) sub-module and have each subnet join it:
 
 ```hcl
-module "private_subnets" {
+module "private" {
   source = "terraform-aws-modules/vpc/aws//modules/subnet"
 
-  name   = "example-private"
-  vpc_id = "vpc-12345678"
+  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i + 8) }
 
-  # TODO
+  name              = "example-private-${each.key}"
+  vpc_id            = module.vpc.vpc_id
+  availability_zone = each.key
+  ipv4_cidr_block   = each.value
 
-  tags = {
-    Owner       = "user"
-    Environment = "dev"
+  create_route_table = false
+  route_table_id     = module.private_route_table.id
+}
+```
+
+### A subnet hosting a NAT gateway
+
+```hcl
+module "public" {
+  source = "terraform-aws-modules/vpc/aws//modules/subnet"
+
+  name              = "example-public"
+  vpc_id            = module.vpc.vpc_id
+  availability_zone = local.azs[0]
+  ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, 0)
+
+  create_nat_gateway = true
+
+  routes = {
+    igw = {
+      destination_ipv4_cidr_block = "0.0.0.0/0"
+      gateway_id                  = module.vpc.igw_id
+    }
   }
 }
+```
+
+Other subnets then route to it with `module.public.nat_gateway_id`.
+
+### Network ACLs
+
+This sub-module does not create network ACLs, because one network ACL is normally shared by
+several subnets and so has no single subnet to own it. Create the ACL yourself and have each
+subnet join it, the same way subnets join a shared route table:
+
+```hcl
+  create_network_acl_association = true
+  network_acl_id                 = aws_network_acl.this.id
 ```
 
 <!-- BEGIN_TF_DOCS -->
