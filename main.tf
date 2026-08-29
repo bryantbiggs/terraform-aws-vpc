@@ -1278,7 +1278,7 @@ resource "aws_nat_gateway" "regional" {
   # Without any blocks the gateway runs in automatic mode, which AWS recommends, and
   # manages its own addresses and zone expansion. Supplying them switches it to manual
   dynamic "availability_zone_address" {
-    for_each = var.regional_nat_gateway_availability_zone_addresses
+    for_each = var.regional_nat_gateway_availability_zone_addresses == null ? {} : var.regional_nat_gateway_availability_zone_addresses
 
     content {
       availability_zone = availability_zone_address.key

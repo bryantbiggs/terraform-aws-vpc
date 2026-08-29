@@ -1210,15 +1210,13 @@ variable "regional_nat_gateway_availability_zone_addresses" {
   type = map(object({
     allocation_ids = set(string)
   }))
-  default  = {}
-  nullable = false
+  default = {}
 }
 
 variable "regional_nat_gateway_tags" {
   description = "Additional tags for the regional NAT gateway"
   type        = map(string)
   default     = {}
-  nullable    = false
 }
 
 variable "create_egress_only_igw" {
