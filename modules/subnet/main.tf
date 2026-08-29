@@ -214,6 +214,16 @@ resource "aws_eip" "this" {
   network_border_group      = var.eip_network_border_group
   public_ipv4_pool          = var.eip_public_ipv4_pool
 
+  dynamic "timeouts" {
+    for_each = var.eip_timeouts != null ? [var.eip_timeouts] : []
+
+    content {
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
+
   tags = merge(
     var.tags,
     { for k, v in { Name = var.name } : k => v if v != "" },
@@ -230,6 +240,16 @@ resource "aws_nat_gateway" "this" {
   allocation_id     = var.nat_gateway_connectivity_type == "private" ? null : var.create_eip ? aws_eip.this[0].id : var.nat_gateway_allocation_id
   connectivity_type = var.nat_gateway_connectivity_type
   subnet_id         = aws_subnet.this[0].id
+
+  dynamic "timeouts" {
+    for_each = var.nat_gateway_timeouts != null ? [var.nat_gateway_timeouts] : []
+
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 
   tags = merge(
     var.tags,

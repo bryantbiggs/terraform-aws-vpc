@@ -342,6 +342,26 @@ variable "eip_tags" {
   nullable    = false
 }
 
+variable "eip_timeouts" {
+  description = "Read, update, and delete timeout configurations for the Elastic IP. The Elastic IP resource has no create timeout"
+  type = object({
+    read   = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  })
+  default = null
+}
+
+variable "nat_gateway_timeouts" {
+  description = "Create, update, and delete timeout configurations for the NAT gateway"
+  type = object({
+    create = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  })
+  default = null
+}
+
 variable "nat_gateway_allocation_id" {
   description = "The Allocation ID of the Elastic IP address for the gateway. Required when `nat_gateway_connectivity_type` is `public` and `create_eip` is `false`"
   type        = string
