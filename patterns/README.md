@@ -10,7 +10,8 @@ is rather than only that it plans.
 
 Every pattern directory contains a `README.md` with the architecture, the route tables it
 produces, the AWS guidance it follows and the issues it answers, plus a runnable root
-module.
+module. The one exception is [subnet-options](subnet-options/), which is a coverage
+pattern rather than an architecture and says so in its opening line.
 
 **Self-contained** means the pattern can be applied and destroyed on its own. The rest
 need something that exists outside this repository, so they are validated but cannot be
@@ -56,6 +57,15 @@ part of an apply sweep.
 | Pattern | Self-contained | Answers |
 | ------- | -------------- | ------- |
 | [shared-vpc](shared-vpc/) | **no**, needs participant account IDs | exercises `share_subnet`, which nothing else did |
+
+## Coverage
+
+Not an architecture. This one works backwards from a sub-module's variable file to make
+sure the arguments no other pattern sets are still exercised by something.
+
+| Pattern | Self-contained | Answers |
+| ------- | -------------- | ------- |
+| [subnet-options](subnet-options/) | yes | the inputs and outputs of `modules/subnet` that no other pattern reaches, including all four timeout paths |
 
 ## Not covered here
 
