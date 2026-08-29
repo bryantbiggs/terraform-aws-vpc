@@ -44,8 +44,11 @@ module "vpc" {
 ################################################################################
 
 module "nat_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.allowed_cidr, 4, i) }
+  source = "../../modules/subnet"
+  # Derived from the VPC's secondary CIDR output rather than the local literal, so
+  # Terraform knows these subnets live inside that association. Without the dependency it
+  # tries to disassociate the CIDR while the subnets are still in it, and destroy fails
+  for_each = { for i, az in local.azs : az => cidrsubnet(module.vpc.vpc_secondary_cidr_blocks[0], 4, i) }
 
   name              = "${local.name}-nat-${each.key}"
   vpc_id            = module.vpc.vpc_id
