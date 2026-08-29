@@ -17,7 +17,7 @@ locals {
   firewall_subnets = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i + 8) }
 
   tags = {
-    Example    = local.name
+    Pattern    = local.name
     GithubRepo = "terraform-aws-vpc"
     GithubOrg  = "terraform-aws-modules"
   }
@@ -33,23 +33,12 @@ module "vpc" {
   name = local.name
   cidr = local.vpc_cidr
 
-  azs             = local.azs
+  azs = local.azs
+
+  create_igw      = true
   private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k)]
 
   tags = local.tags
-}
-
-################################################################################
-# Internet Gateway
-################################################################################
-
-# The VPC module creates an internet gateway only when it is also managing public
-# subnets. This example composes its own public subnets through the subnet sub-module,
-# so it owns the gateway as well
-resource "aws_internet_gateway" "this" {
-  vpc_id = module.vpc.vpc_id
-
-  tags = merge(local.tags, { Name = local.name })
 }
 
 ################################################################################
@@ -100,7 +89,7 @@ module "firewall_subnet" {
   routes = {
     igw = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      gateway_id                  = aws_internet_gateway.this.id
+      gateway_id                  = module.vpc.igw_id
     }
   }
 
@@ -116,17 +105,17 @@ module "firewall_subnet" {
 # sees only one direction of each connection, which a stateful engine cannot evaluate.
 #
 # This route table is associated with the gateway and with no subnet, which is why it
-# comes from the gateway-route-table sub-module rather than the subnet sub-module
+# comes from the route-table sub-module rather than the subnet sub-module
 #
 # Route table layout: https://docs.aws.amazon.com/network-firewall/latest/developerguide/arch-two-zone-igw.html
 # Dedicated gateway route table: https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html
 module "igw_ingress" {
-  source = "../../modules/gateway-route-table"
+  source = "../../modules/route-table"
 
   name   = "${local.name}-igw-ingress"
   vpc_id = module.vpc.vpc_id
 
-  gateway_id = aws_internet_gateway.this.id
+  gateway_id = module.vpc.igw_id
 
   # Traffic destined for each public subnet is sent to the firewall endpoint in that
   # subnet's own availability zone, which is what keeps the flow symmetric
@@ -146,7 +135,7 @@ module "igw_ingress" {
 
 module "network_firewall" {
   source  = "terraform-aws-modules/network-firewall/aws"
-  version = "~> 1.0"
+  version = "~> 2.0"
 
   # Firewall
   name        = local.name

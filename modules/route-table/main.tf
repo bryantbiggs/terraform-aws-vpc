@@ -68,11 +68,13 @@ resource "aws_route" "this" {
 # Gateway Association
 ################################################################################
 
-# This route table is associated with a gateway and deliberately with no subnet. AWS
-# requires a gateway route table to be dedicated to the gateway:
+# Only when a gateway is given. A route table with no gateway is a plain route table,
+# which callers share across subnets by passing its ID to the subnet sub-module.
+#
+# A gateway route table must be dedicated to the gateway and associated with no subnet:
 # https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html
 resource "aws_route_table_association" "this" {
-  count = var.create ? 1 : 0
+  count = var.create && var.gateway_id != null ? 1 : 0
 
   region = var.region
 

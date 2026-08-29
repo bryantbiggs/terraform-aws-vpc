@@ -179,6 +179,22 @@ variable "resource_share_arn" {
 }
 
 ################################################################################
+# Network ACL
+################################################################################
+
+variable "create_network_acl_association" {
+  description = "Controls if the subnet is associated with the network ACL given by `network_acl_id`. A separate toggle rather than deriving it from `network_acl_id`, because that ID is usually a computed value and would leave the count unknown at plan time"
+  type        = bool
+  default     = false
+}
+
+variable "network_acl_id" {
+  description = "The ID of an existing network ACL to associate the subnet with. A network ACL is normally shared by several subnets, so this sub-module joins one rather than creating one. Leave unset to stay on the VPC default network ACL"
+  type        = string
+  default     = null
+}
+
+################################################################################
 # Route Table
 ################################################################################
 
@@ -235,7 +251,6 @@ variable "routes" {
     # this_internet_gateway     = optional(bool)
     local_gateway_id          = optional(string)
     nat_gateway_id            = optional(string)
-    this_nat_gateway          = optional(bool, false)
     network_interface_id      = optional(string)
     transit_gateway_id        = optional(string)
     vpc_endpoint_id           = optional(string)

@@ -1,5 +1,5 @@
 module "wrapper" {
-  source = "../../modules/gateway-route-table"
+  source = "../../modules/route-table"
 
   for_each = var.items
 

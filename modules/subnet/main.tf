@@ -76,6 +76,32 @@ resource "aws_ram_resource_association" "this" {
 }
 
 ################################################################################
+# Network ACL Association
+#
+# The subnet joins a network ACL rather than creating one, because a network ACL is
+# normally shared by several subnets. Mirrors how the subnet joins a route table.
+#
+# Do not also list this subnet in the `subnet_ids` of the network ACL itself: the
+# provider warns that the two forms conflict and overwrite each other
+################################################################################
+
+resource "aws_network_acl_association" "this" {
+  count = var.create && var.create_network_acl_association ? 1 : 0
+
+  region = var.region
+
+  network_acl_id = var.network_acl_id
+  subnet_id      = aws_subnet.this[0].id
+
+  lifecycle {
+    precondition {
+      condition     = var.network_acl_id != null
+      error_message = "`network_acl_id` is required when `create_network_acl_association` is `true`."
+    }
+  }
+}
+
+################################################################################
 # Route Table
 ################################################################################
 
@@ -125,7 +151,7 @@ resource "aws_route" "this" {
   egress_only_gateway_id    = each.value.egress_only_gateway_id
   gateway_id                = each.value.gateway_id
   local_gateway_id          = each.value.local_gateway_id
-  nat_gateway_id            = each.value.this_nat_gateway ? try(aws_nat_gateway.this[0].id, null) : each.value.nat_gateway_id
+  nat_gateway_id            = each.value.nat_gateway_id
   network_interface_id      = each.value.network_interface_id
   transit_gateway_id        = each.value.transit_gateway_id
   vpc_endpoint_id           = each.value.vpc_endpoint_id

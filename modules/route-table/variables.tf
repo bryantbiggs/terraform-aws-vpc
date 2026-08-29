@@ -94,7 +94,7 @@ variable "route_timeouts" {
 ################################################################################
 
 variable "gateway_id" {
-  description = "The ID of the internet gateway or virtual private gateway to associate the route table with"
+  description = "The ID of an internet gateway or virtual private gateway to associate the route table with. Leave unset for a plain route table to be shared across subnets"
   type        = string
   default     = null
 }

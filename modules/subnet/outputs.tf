@@ -27,6 +27,11 @@ output "ipv6_cidr_block" {
   value       = try(aws_subnet.this[0].ipv6_cidr_block, null)
 }
 
+output "network_acl_association_id" {
+  description = "The ID of the association between the subnet and its network ACL"
+  value       = try(aws_network_acl_association.this[0].id, null)
+}
+
 ################################################################################
 # Route Table
 ################################################################################
