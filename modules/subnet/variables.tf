@@ -313,7 +313,7 @@ variable "eip_address" {
 
 variable "eip_associate_with_private_ip" {
   description = "User-specified primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address"
-  type        = bool
+  type        = string
   default     = null
 }
 
