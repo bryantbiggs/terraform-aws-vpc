@@ -7,14 +7,17 @@ resource "aws_subnet" "this" {
 
   region = var.region
 
-  assign_ipv6_address_on_creation                = var.assign_ipv6_address_on_creation
-  availability_zone                              = var.availability_zone
-  availability_zone_id                           = var.availability_zone_id
-  cidr_block                                     = var.ipv4_cidr_block
-  customer_owned_ipv4_pool                       = var.customer_owned_ipv4_pool
-  enable_dns64                                   = var.enable_dns64
-  enable_lni_at_device_index                     = var.enable_lni_at_device_index
-  enable_resource_name_dns_aaaa_record_on_launch = var.enable_resource_name_dns_aaaa_record_on_launch
+  assign_ipv6_address_on_creation = var.assign_ipv6_address_on_creation
+  availability_zone               = var.availability_zone
+  availability_zone_id            = var.availability_zone_id
+  cidr_block                      = var.ipv4_cidr_block
+  customer_owned_ipv4_pool        = var.customer_owned_ipv4_pool
+  enable_dns64                    = var.enable_dns64
+  enable_lni_at_device_index      = var.enable_lni_at_device_index
+  # AWS rejects `false` on an IPv6 only subnet: with no IPv4 address, the instance DNS
+  # name has to be based on the instance ID. The provider's own default is `false`, so
+  # passing null through would build a subnet AWS refuses
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_resource_name_dns_aaaa_record_on_launch != null ? var.enable_resource_name_dns_aaaa_record_on_launch : (var.ipv6_native == true ? true : null)
   enable_resource_name_dns_a_record_on_launch    = var.enable_resource_name_dns_a_record_on_launch
   ipv6_cidr_block                                = var.ipv6_cidr_block
   ipv6_native                                    = var.ipv6_native
@@ -38,6 +41,13 @@ resource "aws_subnet" "this" {
     { for k, v in { Name = var.name } : k => v if v != "" },
     var.subnet_tags,
   )
+
+  lifecycle {
+    precondition {
+      condition     = var.ipv6_native != true || var.enable_resource_name_dns_aaaa_record_on_launch != false
+      error_message = "`enable_resource_name_dns_aaaa_record_on_launch` cannot be `false` on an IPv6 only subnet, because the instance DNS name has to be based on the instance ID."
+    }
+  }
 }
 
 ################################################################################

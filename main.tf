@@ -1177,7 +1177,9 @@ resource "aws_internet_gateway" "this" {
 }
 
 resource "aws_egress_only_internet_gateway" "this" {
-  count = local.create_vpc && var.create_egress_only_igw && var.enable_ipv6 && local.max_subnet_length > 0 ? 1 : 0
+  # Scoped to the VPC, like the internet gateway, the VPN gateway and the DHCP options,
+  # so it is not gated on this module also managing subnets. Asking for it is enough
+  count = local.create_vpc && var.create_egress_only_igw && var.enable_ipv6 ? 1 : 0
 
   region = var.region
 
