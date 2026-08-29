@@ -4,6 +4,7 @@ module "wrapper" {
   for_each = var.items
 
   create                           = try(each.value.create, var.defaults.create, true)
+  create_gateway_association       = try(each.value.create_gateway_association, var.defaults.create_gateway_association, false)
   gateway_id                       = try(each.value.gateway_id, var.defaults.gateway_id, null)
   name                             = try(each.value.name, var.defaults.name, "")
   region                           = try(each.value.region, var.defaults.region, null)

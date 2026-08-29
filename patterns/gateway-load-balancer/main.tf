@@ -54,6 +54,7 @@ module "endpoint_subnet" {
   routes = {
     igw = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
+      create_gateway_association  = true
       gateway_id                  = module.vpc.igw_id
     }
   }

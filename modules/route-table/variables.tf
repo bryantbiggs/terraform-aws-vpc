@@ -94,6 +94,12 @@ variable "route_timeouts" {
 # Gateway Association
 ################################################################################
 
+variable "create_gateway_association" {
+  description = "Controls if the route table is associated with the gateway given by `gateway_id`. A separate toggle rather than deriving it from `gateway_id`, because that ID is normally a computed value and would leave the count unknown at plan time"
+  type        = bool
+  default     = false
+}
+
 variable "gateway_id" {
   description = "The ID of an internet gateway or virtual private gateway to associate the route table with. Leave unset for a plain route table to be shared across subnets"
   type        = string

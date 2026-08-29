@@ -75,12 +75,19 @@ resource "aws_route" "this" {
 # A gateway route table must be dedicated to the gateway and associated with no subnet:
 # https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html
 resource "aws_route_table_association" "this" {
-  count = var.create && var.gateway_id != null ? 1 : 0
+  count = var.create && var.create_gateway_association ? 1 : 0
 
   region = var.region
 
   gateway_id     = var.gateway_id
   route_table_id = aws_route_table.this[0].id
+
+  lifecycle {
+    precondition {
+      condition     = var.gateway_id != null
+      error_message = "`gateway_id` is required when `create_gateway_association` is `true`."
+    }
+  }
 
   dynamic "timeouts" {
     for_each = var.route_table_association_timeouts != null ? [var.route_table_association_timeouts] : []
