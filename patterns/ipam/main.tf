@@ -46,11 +46,22 @@ module "vpc" {
 # the CIDR values are unknown, which is what keeps the counts valid
 ################################################################################
 
-module "public_route_table" {
-  source = "../../modules/route-table"
+module "public" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-public"
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+
+    # derived from the allocation, so unknown until apply
+    ipv4_cidr_block = cidrsubnet(module.vpc.vpc_cidr_block, 4, i)
+
+    create_nat_gateway = i == 0
+  } }
+
+  map_public_ip_on_launch = true
 
   routes = {
     igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
@@ -59,54 +70,23 @@ module "public_route_table" {
   tags = local.tags
 }
 
-module "public_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => i }
-
-  name              = "${local.name}-public-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-
-  # derived from the allocation, so unknown until apply
-  ipv4_cidr_block = cidrsubnet(module.vpc.vpc_cidr_block, 4, each.value)
-
-  map_public_ip_on_launch = true
-
-  create_route_table = false
-  route_table_id     = module.public_route_table.id
-
-  create_nat_gateway = each.value == 0
-
-  tags = local.tags
-}
-
-module "private_route_table" {
-  source = "../../modules/route-table"
+module "private" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-private"
   vpc_id = module.vpc.vpc_id
 
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(module.vpc.vpc_cidr_block, 4, i + 8)
+  } }
+
   routes = {
     nat = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      nat_gateway_id              = module.public_subnet[local.azs[0]].nat_gateway_id
+      nat_gateway_id              = module.public.nat_gateway_ids[local.azs[0]]
     }
   }
-
-  tags = local.tags
-}
-
-module "private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => i }
-
-  name              = "${local.name}-private-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = cidrsubnet(module.vpc.vpc_cidr_block, 4, each.value + 8)
-
-  create_route_table = false
-  route_table_id     = module.private_route_table.id
 
   tags = local.tags
 }

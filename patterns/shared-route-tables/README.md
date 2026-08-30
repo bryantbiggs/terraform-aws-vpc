@@ -33,12 +33,17 @@ be per subnet when the routes differ. Nothing else decides it.
 
 ## How it is expressed
 
-Sharing is `create_route_table = false` plus a `route_table_id`, so the subnet joins a
-table rather than making one. There is no `route_table_per_subnet` flag, because the
-caller decides by choosing which module makes the table.
+Nothing sets a flag. The `subnets` sub-module reads where the routes are written. Routes
+declared once on the group mean every subnet in it routes identically, so it builds one
+table and associates all of them with it. Routes declared inside a subnet entry mean they
+differ, so that subnet takes a table of its own.
 
-Naming is `route_table_tags = { Name = ... }`, which overrides the generated name, so
-route tables are named independently of their subnets.
+The two tiers in this pattern are the same module block with the same arguments. Only the
+position of `routes` changes, and the number of route tables follows from it.
+
+Naming splits the same way. `route_table_tags = { Name = ... }` renames the one table a
+group shares, so it is named independently of its subnets. Tables created per subnet take
+the name of the subnet that owns them.
 
 ## Requests this answers
 

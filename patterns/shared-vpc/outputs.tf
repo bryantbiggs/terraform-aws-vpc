@@ -10,5 +10,5 @@ output "shared_subnet_ids" {
 
 output "owner_only_subnet_id" {
   description = "The egress subnet, deliberately not shared"
-  value       = module.public_subnet.id
+  value       = module.egress.ids["public"]
 }

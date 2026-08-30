@@ -5,10 +5,10 @@ output "vpc_id" {
 
 output "public_subnet_ids" {
   description = "Map of availability zone to the new public subnet ID"
-  value       = { for k, v in module.public_subnet : k => v.id }
+  value       = module.public.ids
 }
 
 output "private_subnet_ids" {
   description = "Map of availability zone to the new private subnet ID"
-  value       = { for k, v in module.private_subnet : k => v.id }
+  value       = module.private.ids
 }

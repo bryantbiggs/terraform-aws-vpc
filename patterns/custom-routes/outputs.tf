@@ -1,14 +1,14 @@
 output "private_route_table_id" {
   description = "The route table carrying all four routes"
-  value       = module.private_route_table.id
+  value       = module.private.shared_route_table_id
 }
 
 output "routes" {
-  description = "Map of route keys to the route resources created, showing the key is the address"
-  value       = keys(module.private_route_table.routes)
+  description = "The route keys carried by the private route table, showing the key is the address"
+  value       = keys(local.private_routes)
 }
 
 output "private_subnet_ids" {
   description = "Map of availability zone to private subnet ID"
-  value       = { for k, v in module.private_subnet : k => v.id }
+  value       = module.private.ids
 }

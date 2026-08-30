@@ -1,11 +1,11 @@
 output "region_subnet_ids" {
   description = "Map of parent Region availability zone to private subnet ID"
-  value       = { for k, v in module.region_private_subnet : k => v.id }
+  value       = module.region_private.ids
 }
 
 output "region_nat_gateway_id" {
   description = "The NAT gateway serving the parent Region"
-  value       = module.region_public_subnet[local.azs[0]].nat_gateway_id
+  value       = module.region_public.nat_gateway_ids[local.azs[0]]
 }
 
 output "local_zone_subnet_id" {

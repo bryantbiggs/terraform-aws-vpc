@@ -42,32 +42,28 @@ module "vpc" {
 # Participants use it but cannot see or change it
 ################################################################################
 
-module "egress_route_table" {
-  source = "../../modules/route-table"
+module "egress" {
+  source = "../../modules/subnets"
 
-  name   = "${local.name}-egress"
+  name   = local.name
   vpc_id = module.vpc.vpc_id
 
-  routes = {
-    igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
+  subnets = {
+    public = {
+      availability_zone = local.azs[0]
+      ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, 200)
+    }
   }
-
-  tags = local.tags
-}
-
-module "public_subnet" {
-  source = "../../modules/subnet"
-
-  name              = "${local.name}-public"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = local.azs[0]
-  ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, 200)
 
   map_public_ip_on_launch = true
   create_nat_gateway      = true
 
-  create_route_table = false
-  route_table_id     = module.egress_route_table.id
+  # the table is the group's, and it is named for what it does rather than for the subnet
+  route_table_tags = { Name = "${local.name}-egress" }
+
+  routes = {
+    igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
+  }
 
   # deliberately not shared
   tags = local.tags
@@ -86,7 +82,7 @@ module "app_route_table" {
   routes = {
     nat = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      nat_gateway_id              = module.public_subnet.nat_gateway_id
+      nat_gateway_id              = module.egress.nat_gateway_ids["public"]
     }
   }
 

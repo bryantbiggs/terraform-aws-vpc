@@ -39,13 +39,27 @@ module "vpc" {
 
 ################################################################################
 # Public: dual stack, both defaults at the internet gateway
+#
+# Both subnets route to the same gateway, so the routes are declared once for the group
+# and one route table serves them
 ################################################################################
 
-module "public_route_table" {
-  source = "../../modules/route-table"
+module "public" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-public"
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+    ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, i)
+
+    create_nat_gateway = i == 0
+  } }
+
+  map_public_ip_on_launch         = true
+  assign_ipv6_address_on_creation = true
 
   routes = {
     ipv4 = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
@@ -55,41 +69,28 @@ module "public_route_table" {
   tags = local.tags
 }
 
-module "public_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => i }
-
-  name              = "${local.name}-public-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, each.value)
-  ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, each.value)
-
-  map_public_ip_on_launch         = true
-  assign_ipv6_address_on_creation = true
-
-  create_route_table = false
-  route_table_id     = module.public_route_table.id
-
-  create_nat_gateway = each.value == 0
-
-  tags = local.tags
-}
-
 ################################################################################
 # Private: dual stack, IPv4 through the NAT gateway, IPv6 outbound only
 ################################################################################
 
-module "private_route_table" {
-  source = "../../modules/route-table"
+module "private" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-private"
   vpc_id = module.vpc.vpc_id
 
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i + 8)
+    ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, i + 8)
+  } }
+
+  assign_ipv6_address_on_creation = true
+
   routes = {
     ipv4 = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      nat_gateway_id              = module.public_subnet[local.azs[0]].nat_gateway_id
+      nat_gateway_id              = module.public.nat_gateway_ids[local.azs[0]]
     }
     # no translation, so no NAT gateway on this path
     ipv6 = {
@@ -101,33 +102,26 @@ module "private_route_table" {
   tags = local.tags
 }
 
-module "private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => i }
-
-  name              = "${local.name}-private-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, each.value + 8)
-  ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, each.value + 8)
-
-  assign_ipv6_address_on_creation = true
-
-  create_route_table = false
-  route_table_id     = module.private_route_table.id
-
-  tags = local.tags
-}
-
 ################################################################################
 # IPv6 only: no IPv4 address at all, reaching IPv4 hosts through DNS64 and NAT64
 ################################################################################
 
-module "ipv6_only_route_table" {
-  source = "../../modules/route-table"
+module "ipv6_only" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-ipv6-only"
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, i + 16)
+    ipv6_native       = true
+  } }
+
+  assign_ipv6_address_on_creation = true
+
+  # synthesise IPv6 answers for IPv4 only destinations
+  enable_dns64 = true
 
   routes = {
     ipv6 = {
@@ -137,30 +131,9 @@ module "ipv6_only_route_table" {
     # without this, DNS64 resolves names that then never connect
     nat64 = {
       destination_ipv6_cidr_block = local.nat64_prefix
-      nat_gateway_id              = module.public_subnet[local.azs[0]].nat_gateway_id
+      nat_gateway_id              = module.public.nat_gateway_ids[local.azs[0]]
     }
   }
-
-  tags = local.tags
-}
-
-module "ipv6_only_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => i }
-
-  name              = "${local.name}-ipv6-only-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv6_cidr_block   = cidrsubnet(module.vpc.vpc_ipv6_cidr_block, 8, each.value + 16)
-
-  ipv6_native                     = true
-  assign_ipv6_address_on_creation = true
-
-  # synthesise IPv6 answers for IPv4 only destinations
-  enable_dns64 = true
-
-  create_route_table = false
-  route_table_id     = module.ipv6_only_route_table.id
 
   tags = local.tags
 }

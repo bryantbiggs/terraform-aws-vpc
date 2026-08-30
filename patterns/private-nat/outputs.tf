@@ -15,5 +15,5 @@ output "nat_subnet_ids" {
 
 output "workload_subnet_ids" {
   description = "Map of availability zone to workload subnet ID"
-  value       = { for k, v in module.workload_subnet : k => v.id }
+  value       = module.workload.ids
 }

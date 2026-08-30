@@ -73,23 +73,28 @@ module "nat_subnet" {
 
 ################################################################################
 # Workload subnets, translating before they route on-premises
+#
+# Each zone translates at its own gateway, so the routes differ per subnet and each
+# subnet keeps a route table of its own
 ################################################################################
 
-module "workload_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i) }
+module "workload" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-workload-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-workload"
+  vpc_id = module.vpc.vpc_id
 
-  routes = {
-    onprem = {
-      destination_ipv4_cidr_block = local.onprem_cidr
-      nat_gateway_id              = module.nat_subnet[each.key].nat_gateway_id
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+
+    routes = {
+      onprem = {
+        destination_ipv4_cidr_block = local.onprem_cidr
+        nat_gateway_id              = module.nat_subnet[az].nat_gateway_id
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }

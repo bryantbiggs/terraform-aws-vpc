@@ -11,14 +11,17 @@ locals {
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
+  # tags that mean something for the workload, carried per subnet
+  eks_tags = { "kubernetes.io/role/internal-elb" = "1" }
+
   # Named by what they are for, sized by what they hold, placed where they are needed.
   # Note the asymmetry: pods and nodes in two zones, cache in one, transit in one
   subnets = {
-    eks-pods-a = { availability_zone = local.azs[0], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 2, 2) }
-    eks-pods-b = { availability_zone = local.azs[1], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 2, 3) }
+    eks-pods-a = { availability_zone = local.azs[0], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 2, 2), tags = local.eks_tags }
+    eks-pods-b = { availability_zone = local.azs[1], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 2, 3), tags = local.eks_tags }
 
-    eks-nodes-a = { availability_zone = local.azs[0], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 8, 0) }
-    eks-nodes-b = { availability_zone = local.azs[1], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 8, 1) }
+    eks-nodes-a = { availability_zone = local.azs[0], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 8, 0), tags = local.eks_tags }
+    eks-nodes-b = { availability_zone = local.azs[1], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 8, 1), tags = local.eks_tags }
 
     cache-public = { availability_zone = local.azs[2], ipv4_cidr_block = cidrsubnet(local.vpc_cidr, 8, 2) }
 
@@ -45,34 +48,25 @@ module "vpc" {
   tags = local.tags
 }
 
-module "route_table" {
-  source = "../../modules/route-table"
+################################################################################
+# Subnets
+#
+# Every subnet routes to the same internet gateway, so the routes are declared once for
+# the group and one route table serves all six
+################################################################################
+
+module "subnets" {
+  source = "../../modules/subnets"
 
   name   = local.name
   vpc_id = module.vpc.vpc_id
 
+  # the key names the subnet and is also its Terraform address
+  subnets = local.subnets
+
   routes = {
     igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
   }
-
-  tags = local.tags
-}
-
-module "subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.subnets
-
-  # the key is the name, and it is also the Terraform address
-  name              = "${local.name}-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.value.availability_zone
-  ipv4_cidr_block   = each.value.ipv4_cidr_block
-
-  create_route_table = false
-  route_table_id     = module.route_table.id
-
-  # tags that mean something for the workload, per subnet
-  subnet_tags = startswith(each.key, "eks-") ? { "kubernetes.io/role/internal-elb" = "1" } : {}
 
   tags = local.tags
 }

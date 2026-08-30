@@ -40,28 +40,41 @@ module "vpc" {
 # can route differently from the workloads
 ################################################################################
 
-module "attachment_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 12, i + 4080) }
+module "attachment" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-tgw-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-tgw"
+  vpc_id = module.vpc.vpc_id
 
-  # local routing only: the attachment does not need a default route
+  # Local routing only: the attachment does not need a default route. An empty `routes`
+  # on the entry says these are the subnet's own routes and there are none of them, which
+  # keeps a table per subnet rather than folding them onto one
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 12, i + 4080)
+    routes            = {}
+  } }
+
   tags = local.tags
 }
 
 ################################################################################
 # Workload subnets, egressing through the transit gateway
+#
+# Every zone sends to the same attachment, so the routes are declared once for the group
+# and one route table serves all three
 ################################################################################
 
-module "private_route_table" {
-  source = "../../modules/route-table"
+module "private" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-private"
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+  } }
 
   routes = {
     # everything outbound goes to the hub, including internet traffic
@@ -81,21 +94,6 @@ module "private_route_table" {
   depends_on = [module.transit_gateway]
 }
 
-module "private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i) }
-
-  name              = "${local.name}-private-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
-
-  create_route_table = false
-  route_table_id     = module.private_route_table.id
-
-  tags = local.tags
-}
-
 ################################################################################
 # Supporting Resources
 ################################################################################
@@ -112,7 +110,7 @@ module "transit_gateway" {
   vpc_attachments = {
     spoke = {
       vpc_id     = module.vpc.vpc_id
-      subnet_ids = [for k, v in module.attachment_subnet : v.id]
+      subnet_ids = values(module.attachment.ids)
     }
   }
 

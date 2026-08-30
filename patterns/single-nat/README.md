@@ -32,8 +32,8 @@ trades availability for cost.
 | Private subnets | `0.0.0.0/0` to the one NAT gateway | **1**, shared: every subnet routes to the same target |
 
 Because every private subnet routes to the same gateway, the routes are identical again
-and one table serves all of them. This is `create_route_table = false` with a shared
-`route_table_id`, the same mechanism [regional-nat](../regional-nat/) uses.
+and one table serves all of them. Both tiers declare their routes once on the group, and
+that is what produces the single shared table.
 
 ## Why this shape
 

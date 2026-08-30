@@ -24,9 +24,10 @@ and a VPC can only have one attached.
 
 ## Why this works
 
-The `subnet` sub-module's only structural input is `vpc_id`. It does not read anything
+The `subnets` sub-module's only structural input is `vpc_id`. It does not read anything
 from the root module, does not assume a tier, and does not assume it is the only thing
-creating subnets in that VPC. The same is true of `route-table`.
+creating subnets in that VPC. The same is true of the `subnet` and `route-table`
+sub-modules it is built from.
 
 That is the difference between a sub-module and a tier of the root module: a tier exists
 inside a VPC the module built, and a sub-module exists inside any VPC at all.

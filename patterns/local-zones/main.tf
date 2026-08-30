@@ -37,13 +37,25 @@ module "vpc" {
 
 ################################################################################
 # Parent Region
+#
+# Both public subnets route to the same internet gateway, so the routes are declared
+# once for the group and one route table serves them
 ################################################################################
 
-module "region_public_route_table" {
-  source = "../../modules/route-table"
+module "region_public" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-region-public"
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+
+    create_nat_gateway = az == local.azs[0]
+  } }
+
+  map_public_ip_on_launch = true
 
   routes = {
     igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
@@ -52,40 +64,25 @@ module "region_public_route_table" {
   tags = local.tags
 }
 
-module "region_public_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i) }
+module "region_private" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-region-public-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-region-private"
+  vpc_id = module.vpc.vpc_id
 
-  map_public_ip_on_launch = true
+  # the routes sit on the entries, so each subnet keeps a route table of its own and can
+  # be repointed at a gateway in its own zone without disturbing the other
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i + 8)
 
-  create_route_table = false
-  route_table_id     = module.region_public_route_table.id
-
-  create_nat_gateway = each.key == local.azs[0]
-
-  tags = local.tags
-}
-
-module "region_private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i + 8) }
-
-  name              = "${local.name}-region-private-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
-
-  routes = {
-    nat = {
-      destination_ipv4_cidr_block = "0.0.0.0/0"
-      nat_gateway_id              = module.region_public_subnet[local.azs[0]].nat_gateway_id
+    routes = {
+      nat = {
+        destination_ipv4_cidr_block = "0.0.0.0/0"
+        nat_gateway_id              = module.region_public.nat_gateway_ids[local.azs[0]]
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }

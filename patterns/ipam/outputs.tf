@@ -5,12 +5,12 @@ output "vpc_cidr_block" {
 
 output "public_subnet_cidr_blocks" {
   description = "Map of availability zone to public subnet CIDR, carved from the allocation"
-  value       = { for k, v in module.public_subnet : k => v.ipv4_cidr_block }
+  value       = module.public.ipv4_cidr_blocks
 }
 
 output "private_subnet_cidr_blocks" {
   description = "Map of availability zone to private subnet CIDR, carved from the allocation"
-  value       = { for k, v in module.private_subnet : k => v.ipv4_cidr_block }
+  value       = module.private.ipv4_cidr_blocks
 }
 
 output "ipam_regional_pool_id" {

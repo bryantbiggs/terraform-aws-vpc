@@ -30,9 +30,10 @@ Three things fall out of the caller owning the keys:
 - **Any number of groups.** There is no seventh-tier limit because there are no tiers.
 - **Asymmetric zones.** `eks-pods` exists in two zones while `cache-public` exists in
   one. A positional list forces the same count everywhere.
-- **Stable addresses.** The Terraform address is `module.subnet["eks-pods-a"]`, so
-  removing `transit` does not renumber anything else. With positional lists, removing a
-  subnet from the middle shifts every subnet after it and Terraform replaces them.
+- **Stable addresses.** The Terraform address is
+  `module.subnets.module.subnet["eks-pods-a"]`, so removing `transit` does not renumber
+  anything else. With positional lists, removing a subnet from the middle shifts every
+  subnet after it and Terraform replaces them.
 
 That last point is [#1018](https://github.com/terraform-aws-modules/terraform-aws-vpc/issues/1018)
 and [#1081](https://github.com/terraform-aws-modules/terraform-aws-vpc/issues/1081).

@@ -38,13 +38,25 @@ locals {
 
 ################################################################################
 # New public subnets, using the VPC's existing gateway
+#
+# Both route to the same gateway, so the routes are declared once for the group and one
+# route table serves them
 ################################################################################
 
-module "public_route_table" {
-  source = "../../modules/route-table"
+module "public" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-public"
   vpc_id = data.aws_vpc.existing.id
+
+  subnets = { for az, cidr in local.public : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+
+    create_nat_gateway = az == local.azs[0]
+  } }
+
+  map_public_ip_on_launch = true
 
   routes = {
     igw = {
@@ -56,56 +68,27 @@ module "public_route_table" {
   tags = local.tags
 }
 
-module "public_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.public
-
-  name              = "${local.name}-public-${each.key}"
-  vpc_id            = data.aws_vpc.existing.id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
-
-  map_public_ip_on_launch = true
-
-  create_route_table = false
-  route_table_id     = module.public_route_table.id
-
-  create_nat_gateway = each.key == local.azs[0]
-
-  tags = local.tags
-}
-
 ################################################################################
 # New private subnets, egressing through the new NAT gateway
 ################################################################################
 
-module "private_route_table" {
-  source = "../../modules/route-table"
+module "private" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-private"
   vpc_id = data.aws_vpc.existing.id
 
+  subnets = { for az, cidr in local.private : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+  } }
+
   routes = {
     nat = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      nat_gateway_id              = module.public_subnet[local.azs[0]].nat_gateway_id
+      nat_gateway_id              = module.public.nat_gateway_ids[local.azs[0]]
     }
   }
-
-  tags = local.tags
-}
-
-module "private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.private
-
-  name              = "${local.name}-private-${each.key}"
-  vpc_id            = data.aws_vpc.existing.id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
-
-  create_route_table = false
-  route_table_id     = module.private_route_table.id
 
   tags = local.tags
 }
