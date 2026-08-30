@@ -145,6 +145,11 @@ output "public_internet_gateway_route_id" {
   value       = try(aws_route.public_internet_gateway[0].id, null)
 }
 
+output "public_dns64_nat_gateway_route_ids" {
+  description = "List of IDs of the public DNS64 NAT gateway routes"
+  value       = aws_route.public_dns64_nat_gateway[*].id
+}
+
 output "public_internet_gateway_ipv6_route_id" {
   description = "ID of the IPv6 internet gateway route"
   value       = try(aws_route.public_internet_gateway_ipv6[0].id, null)

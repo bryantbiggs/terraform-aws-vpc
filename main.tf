@@ -215,6 +215,24 @@ resource "aws_route" "public_internet_gateway" {
   }
 }
 
+# DNS64 makes the resolver synthesise addresses inside 64:ff9b::/96 for IPv4 only
+# destinations, and reaching them needs a NAT gateway to translate. Public subnets enable
+# DNS64 by default but had no such route, so on an IPv6 only public subnet names resolved
+# and connections then went nowhere. The private and database tiers already have this
+resource "aws_route" "public_dns64_nat_gateway" {
+  count = local.create_public_subnets && var.enable_nat_gateway && var.enable_ipv6 && (length(var.public_subnet_ipv6_prefixes) > 0 || var.public_subnet_ipv6_native) && var.public_subnet_enable_dns64 ? local.num_public_route_tables : 0
+
+  region = var.region
+
+  route_table_id              = element(aws_route_table.public[*].id, count.index)
+  destination_ipv6_cidr_block = "64:ff9b::/96"
+  nat_gateway_id              = element(aws_nat_gateway.this[*].id, count.index)
+
+  timeouts {
+    create = "5m"
+  }
+}
+
 resource "aws_route" "public_internet_gateway_ipv6" {
   count = local.create_public_subnets && var.create_igw && var.enable_ipv6 ? local.num_public_route_tables : 0
 
