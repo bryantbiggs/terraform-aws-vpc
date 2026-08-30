@@ -194,6 +194,12 @@ variable "create_nat_gateway" {
   default     = false
 }
 
+variable "nat_gateway_connectivity_type" {
+  description = "Connectivity type for each NAT gateway created in the group. Valid values are `private` or `public`. A subnet can override this"
+  type        = string
+  default     = null
+}
+
 variable "nat_gateway_tags" {
   description = "Additional tags for the NAT gateway(s)"
   type        = map(string)

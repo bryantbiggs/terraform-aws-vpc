@@ -5,12 +5,12 @@ output "gwlb_endpoint_ids" {
 
 output "application_subnet_ids" {
   description = "Map of availability zone to application subnet ID"
-  value       = { for k, v in module.application_subnet : k => v.id }
+  value       = module.application.ids
 }
 
 output "endpoint_subnet_ids" {
   description = "Map of availability zone to endpoint subnet ID"
-  value       = { for k, v in module.endpoint_subnet : k => v.id }
+  value       = module.endpoint.ids
 }
 
 output "igw_ingress_route_table_id" {

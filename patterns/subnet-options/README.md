@@ -1,9 +1,9 @@
 # Subnet Options
 
 This one is not an architecture. It is a coverage pattern: it exists to exercise the
-inputs and outputs of [`modules/subnet`](../../modules/subnet) that no other pattern or
-example reaches, so that a change to the sub-module has something that fails when it
-breaks them.
+inputs and outputs of [`modules/subnet`](../../modules/subnet) and
+[`modules/subnets`](../../modules/subnets) that no other pattern or example reaches, so
+that a change to either has something that fails when it breaks them.
 
 The other directories under `patterns/` each start from a network shape and justify it.
 This one starts from the sub-module's variable file and works backwards, so the topology
@@ -12,20 +12,20 @@ accepts. Do not copy it as a network design.
 
 ## Why it exists
 
-`modules/subnet` takes 46 inputs and returns 22 outputs. Before this pattern the sixteen
-directories under `patterns/` set 21 of those inputs and read 5 of those outputs, and
-nothing under `examples/` uses the sub-module at all. Several of the untouched arguments
-are ones where bugs were found and fixed, which means the fixes were protected by
-nothing.
+`modules/subnet` takes 48 inputs and returns 22 outputs. Most tiers are built from the
+[`subnets`](../../modules/subnets) group sub-module instead, which leaves the primitive
+reached directly by only two other patterns, between them setting 9 of those inputs.
+Nothing under `examples/` uses it at all. Several of the untouched arguments are ones
+where bugs were found and fixed, which means the fixes were protected by nothing.
 
 An argument that is never set is an argument that can regress silently. A dynamic block
 whose `for_each` is empty is never evaluated, so `terraform validate` passing over the
-other patterns says nothing about whether the block inside it is correct. All four
+other patterns says nothing about whether the block inside it is correct. All six
 timeout blocks in the sub-module were in exactly that position.
 
-With this pattern in place 37 of the 46 inputs are set and all 22 outputs are read. The
-nine that remain need something no standalone root module can create, and are listed at
-the bottom.
+With this pattern in place 30 of the 48 inputs are set and all 22 outputs are read. Of
+the rest, some need something no standalone root module can create and are listed at the
+bottom, and some are reached through the group sub-module rather than here.
 
 ## What it covers
 
@@ -45,8 +45,12 @@ the bottom.
 | `enable_resource_name_dns_aaaa_record_on_launch` | `external_eip_subnet` | needs IPv6 on the subnet |
 | `eip_tags` | `managed_eip_subnet` | only has something to tag when `create_eip` is true |
 | `nat_gateway_tags` | both subnets | |
+| `eip_timeouts` | `managed_eip_subnet` | Elastic IP read, update and delete, and it has no create |
+| `nat_gateway_timeouts` | `managed_eip_subnet` | NAT gateway create, update and delete |
 | `create_network_acl_association`, `network_acl_id` | `managed_eip_subnet` | joins an ACL rather than creating one |
 | `create = false` | `disabled` | produces no resources and no output errors |
+| `create = false` on the group | `disabled_group` | the same for `modules/subnets`, including its route table and network ACL |
+| `create_network_acl`, `network_acl_rules`, `network_acl_tags` | `acl_group` | the group sub-module's own ACL, with TCP, ICMP, IPv6 and egress rules |
 
 The outputs newly read here are `arn`, `owner_id`, `ipv6_cidr_block`, `routes`,
 `network_acl_association_id`, `route_table_arn`, `route_table_association_id`,

@@ -1,8 +1,12 @@
-# AWS Subnets Terraform Module
+# AWS Subnet Terraform Module
 
-Terraform module which creates AWS VPC Subnet resources.
+Terraform module which creates a single AWS VPC Subnet and the routing that belongs to it.
 
-This module is designed to create a set of one or more subnets that serve a desired purpose. For example, one module definition would be used for public subnets, another for private subnets, another for database subnets, etc. This design affords users the ability to create any desired design configuration for a set of subnets, where multiple sets of subnets are composed under the respective VPC to create the desired network topology.
+This is the primitive the composable subnet sub-modules are built from. For a whole tier of
+subnets in one module block, use the [subnets](../subnets) sub-module, which wraps this one
+and adds the shared route table and the network ACL a tier needs. Reach for this sub-module
+directly when a tier is genuinely one subnet, or when subnets in a tier depend on each other,
+such as a private subnet routing to a NAT gateway in the public subnet beside it.
 
 ## Usage
 
@@ -39,8 +43,9 @@ module "public" {
 
 ### Subnets sharing one route table
 
-Routes that are identical for every subnet do not need a table each. Create the table with
-the [route-table](../route-table) sub-module and have each subnet join it:
+Routes that are identical for every subnet do not need a table each. The [subnets](../subnets)
+sub-module works this out on its own, so that is the better starting point. Where the table is
+built elsewhere, a subnet joins it instead of creating one:
 
 ```hcl
 module "private" {
@@ -85,8 +90,9 @@ Other subnets then route to it with `module.public.nat_gateway_id`.
 ### Network ACLs
 
 This sub-module does not create network ACLs, because one network ACL is normally shared by
-several subnets and so has no single subnet to own it. Create the ACL yourself and have each
-subnet join it, the same way subnets join a shared route table:
+several subnets and so has no single subnet to own it. The [subnets](../subnets) sub-module
+creates one for the tier. Where the ACL is built elsewhere, a subnet joins it the same way it
+joins a shared route table:
 
 ```hcl
   create_network_acl_association = true

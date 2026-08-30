@@ -54,42 +54,45 @@ locals {
   }
 }
 
-module "public_subnet" {
-  source = "../../modules/subnet"
+module "public" {
+  source = "../../modules/subnets"
 
-  for_each = local.public_subnets
-
-  name   = "${local.name}-public-${each.key}"
+  name   = "${local.name}-public"
   vpc_id = module.vpc.vpc_id
 
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  # the endpoint is zonal, so each subnet sends its traffic to the endpoint in its own
+  # zone and therefore keeps a route table of its own
+  subnets = { for az, cidr in local.public_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
 
-  routes = {
-    firewall-endpoint = {
-      destination_ipv4_cidr_block = "0.0.0.0/0"
-      vpc_endpoint_id             = local.firewall_endpoints[each.key].endpoint_id
+    routes = {
+      firewall-endpoint = {
+        destination_ipv4_cidr_block = "0.0.0.0/0"
+        vpc_endpoint_id             = local.firewall_endpoints[az].endpoint_id
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }
 
-module "firewall_subnet" {
-  source = "../../modules/subnet"
+module "firewall" {
+  source = "../../modules/subnets"
 
-  for_each = local.firewall_subnets
-
-  name   = "${local.name}-firewall-${each.key}"
+  name   = "${local.name}-firewall"
   vpc_id = module.vpc.vpc_id
 
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  subnets = { for az, cidr in local.firewall_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+  } }
 
+  # inspected traffic leaves through the internet gateway. Every zone leaves the same
+  # way, so the group's routes are declared once and one table serves them all
   routes = {
     igw = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      create_gateway_association  = true
       gateway_id                  = module.vpc.igw_id
     }
   }
@@ -148,9 +151,9 @@ module "network_firewall" {
   subnet_change_protection          = false
 
   vpc_id = module.vpc.vpc_id
-  subnet_mapping = { for k, v in module.firewall_subnet :
+  subnet_mapping = { for k, v in module.firewall.ids :
     (k) => {
-      subnet_id       = v.id
+      subnet_id       = v
       ip_address_type = "IPV4"
     }
   }

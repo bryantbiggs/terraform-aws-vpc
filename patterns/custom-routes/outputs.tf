@@ -5,7 +5,7 @@ output "private_route_table_id" {
 
 output "routes" {
   description = "The route keys carried by the private route table, showing the key is the address"
-  value       = keys(local.private_routes)
+  value       = keys(module.private.shared_route_table_routes)
 }
 
 output "private_subnet_ids" {

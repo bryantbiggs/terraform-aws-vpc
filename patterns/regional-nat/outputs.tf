@@ -5,10 +5,10 @@ output "nat_gateway_id" {
 
 output "private_subnet_ids" {
   description = "Map of availability zone to private subnet ID"
-  value       = { for k, v in module.private_subnet : k => v.id }
+  value       = module.private.ids
 }
 
 output "private_route_table_id" {
   description = "The single route table shared by every private subnet"
-  value       = module.private_route_table.id
+  value       = module.private.shared_route_table_id
 }

@@ -29,14 +29,19 @@ source address it allows.
 
 ## Route tables
 
-| Route table | Entries |
-| ----------- | ------- |
-| Workload subnets | `192.168.0.0/16` to the private NAT gateway |
-| NAT gateway's subnet | `192.168.0.0/16` to the virtual private gateway |
+| Route table | Entries | Count |
+| ----------- | ------- | ----- |
+| Workload subnets | `192.168.0.0/16` to the private NAT gateway in that zone | one per zone |
+| NAT gateways' subnets | `192.168.0.0/16` to the virtual private gateway | **1**, shared |
 
-Two tables, and the order matters: translate first, then route on-premises. Pointing the
-workload subnets straight at the gateway would send un-translated addresses that the far
-side drops.
+Two kinds of table, and the order matters: translate first, then route on-premises.
+Pointing the workload subnets straight at the gateway would send un-translated addresses
+that the far side drops.
+
+The counts follow from where the routes are written. Each workload subnet points at the
+gateway in its own zone, so those routes differ and each subnet takes a table. The NAT
+subnets all point at the virtual private gateway, which is regional, so their routes are
+identical and one table serves them.
 
 ## Why this shape
 

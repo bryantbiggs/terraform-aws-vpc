@@ -81,6 +81,9 @@ module "per_az" {
     availability_zone = az
     ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i + 8)
 
+    # each table is named for the zone it serves, which a group-wide tag cannot do
+    route_table_tags = { Name = "${local.name}-per-az-${az}" }
+
     routes = {
       nat = {
         destination_ipv4_cidr_block = "0.0.0.0/0"

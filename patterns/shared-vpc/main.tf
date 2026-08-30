@@ -73,11 +73,19 @@ module "egress" {
 # Application subnets, shared with the participant accounts
 ################################################################################
 
-module "app_route_table" {
-  source = "../../modules/route-table"
+module "app" {
+  source = "../../modules/subnets"
 
-  name   = "${local.name}-app"
+  name   = local.name
   vpc_id = module.vpc.vpc_id
+
+  subnets = { for k, v in local.shared_subnets : k => {
+    availability_zone = v.az
+    ipv4_cidr_block   = v.cidr
+  } }
+
+  # one table for every team subnet, because they all egress the same way
+  route_table_tags = { Name = "${local.name}-app" }
 
   routes = {
     nat = {
@@ -85,21 +93,6 @@ module "app_route_table" {
       nat_gateway_id              = module.egress.nat_gateway_ids["public"]
     }
   }
-
-  tags = local.tags
-}
-
-module "app_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.shared_subnets
-
-  name              = "${local.name}-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.value.az
-  ipv4_cidr_block   = each.value.cidr
-
-  create_route_table = false
-  route_table_id     = module.app_route_table.id
 
   # participants can launch here, but cannot touch the routing above
   share_subnet       = true

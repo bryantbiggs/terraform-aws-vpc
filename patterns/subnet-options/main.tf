@@ -149,6 +149,20 @@ module "managed_eip_subnet" {
   eip_tags           = { Tier = "managed-eip" }
   nat_gateway_tags   = { Tier = "managed-eip" }
 
+  # the two timeout blocks the other subnet cannot reach: it brings its own address, so
+  # the sub-module creates no Elastic IP there to carry them
+  eip_timeouts = {
+    read   = "16m"
+    update = "6m"
+    delete = "4m"
+  }
+
+  nat_gateway_timeouts = {
+    create = "12m"
+    update = "12m"
+    delete = "35m"
+  }
+
   # a network ACL is normally shared by several subnets, so the subnet joins one
   create_network_acl_association = true
   network_acl_id                 = aws_network_acl.this.id
@@ -157,6 +171,81 @@ module "managed_eip_subnet" {
     ipv4 = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
       gateway_id                  = module.vpc.igw_id
+    }
+  }
+
+  tags = local.tags
+}
+
+################################################################################
+# A group carrying its own network ACL
+#
+# The network ACL belongs to the group sub-module rather than to a subnet, because one
+# ACL covers several subnets. Nothing else sets `network_acl_rules`, and a rule resource
+# that is never created is a rule resource that can regress silently
+################################################################################
+
+module "acl_group" {
+  source = "../../modules/subnets"
+
+  name   = "${local.name}-acl"
+  vpc_id = module.vpc.vpc_id
+
+  subnets = {
+    a = {
+      availability_zone_id = local.zone_ids[0]
+      ipv4_cidr_block      = cidrsubnet(local.vpc_cidr, 8, 10)
+    }
+    b = {
+      availability_zone_id = local.zone_ids[1]
+      ipv4_cidr_block      = cidrsubnet(local.vpc_cidr, 8, 11)
+    }
+  }
+
+  create_network_acl = true
+  network_acl_tags   = { Tier = "acl-group" }
+
+  # a network ACL denies everything it is not told to allow, and the two directions are
+  # separate because it is stateless: the reply to an allowed inbound packet needs an
+  # outbound rule of its own
+  network_acl_rules = {
+    inbound_https = {
+      rule_number = 100
+      rule_action = "allow"
+      protocol    = "tcp"
+      cidr_block  = local.vpc_cidr
+      from_port   = 443
+      to_port     = 443
+    }
+    inbound_ephemeral = {
+      rule_number = 110
+      rule_action = "allow"
+      protocol    = "tcp"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 1024
+      to_port     = 65535
+    }
+    # an ICMP rule carries a type and a code where a TCP rule carries ports
+    inbound_icmp = {
+      rule_number = 120
+      rule_action = "allow"
+      protocol    = "icmp"
+      cidr_block  = local.vpc_cidr
+      icmp_type   = -1
+      icmp_code   = -1
+    }
+    deny_ipv6 = {
+      rule_number     = 130
+      rule_action     = "deny"
+      protocol        = "-1"
+      ipv6_cidr_block = "::/0"
+    }
+    outbound_all = {
+      egress      = true
+      rule_number = 100
+      rule_action = "allow"
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
     }
   }
 
@@ -173,6 +262,27 @@ module "disabled" {
   source = "../../modules/subnet"
 
   create = false
+}
+
+module "disabled_group" {
+  source = "../../modules/subnets"
+
+  create = false
+
+  # everything the group would build is described, and none of it is created
+  subnets = {
+    a = {
+      availability_zone_id = local.zone_ids[0]
+      ipv4_cidr_block      = cidrsubnet(local.vpc_cidr, 8, 100)
+    }
+  }
+
+  create_network_acl = true
+  create_nat_gateway = true
+
+  routes = {
+    igw = { destination_ipv4_cidr_block = "0.0.0.0/0", gateway_id = module.vpc.igw_id }
+  }
 }
 
 ################################################################################

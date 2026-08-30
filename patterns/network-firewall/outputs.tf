@@ -519,20 +519,20 @@ output "elasticache_network_acl_arn" {
 
 output "public_subnet_module_ids" {
   description = "Map of public subnet IDs created by the subnet sub-module"
-  value       = { for k, v in module.public_subnet : k => v.id }
+  value       = module.public.ids
 }
 
 output "public_subnet_module_route_table_ids" {
   description = "Map of route table IDs created for the public subnets"
-  value       = { for k, v in module.public_subnet : k => v.route_table_id }
+  value       = module.public.route_table_ids
 }
 
 output "firewall_subnet_module_ids" {
   description = "Map of firewall subnet IDs created by the subnet sub-module"
-  value       = { for k, v in module.firewall_subnet : k => v.id }
+  value       = module.firewall.ids
 }
 
 output "firewall_subnet_module_route_table_ids" {
   description = "Map of route table IDs created for the firewall subnets"
-  value       = { for k, v in module.firewall_subnet : k => v.route_table_id }
+  value       = module.firewall.route_table_ids
 }

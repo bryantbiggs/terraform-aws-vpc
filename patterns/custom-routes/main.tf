@@ -91,8 +91,18 @@ module "attachment" {
 # route table carries them
 ################################################################################
 
-locals {
-  private_routes = {
+module "private" {
+  source = "../../modules/subnets"
+
+  name   = "${local.name}-private"
+  vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+  } }
+
+  routes = {
     # the route the root module would have created for you
     nat = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
@@ -112,20 +122,6 @@ locals {
       egress_only_gateway_id      = module.vpc.egress_only_internet_gateway_id
     }
   }
-}
-
-module "private" {
-  source = "../../modules/subnets"
-
-  name   = "${local.name}-private"
-  vpc_id = module.vpc.vpc_id
-
-  subnets = { for i, az in local.azs : az => {
-    availability_zone = az
-    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
-  } }
-
-  routes = local.private_routes
 
   tags = local.tags
 

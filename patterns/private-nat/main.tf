@@ -43,24 +43,27 @@ module "vpc" {
 # The private NAT gateway, in a subnet from the allow-listed range
 ################################################################################
 
-module "nat_subnet" {
-  source = "../../modules/subnet"
+module "nat" {
+  source = "../../modules/subnets"
+
+  name   = "${local.name}-nat"
+  vpc_id = module.vpc.vpc_id
+
   # Derived from the VPC's secondary CIDR output rather than the local literal, so
   # Terraform knows these subnets live inside that association. Without the dependency it
   # tries to disassociate the CIDR while the subnets are still in it, and destroy fails
-  for_each = { for i, az in local.azs : az => cidrsubnet(module.vpc.vpc_secondary_cidr_blocks[0], 4, i) }
-
-  name              = "${local.name}-nat-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(module.vpc.vpc_secondary_cidr_blocks[0], 4, i)
+  } }
 
   create_nat_gateway            = true
   nat_gateway_connectivity_type = "private"
   # a private NAT gateway takes no allocation, so no address is created for it
   create_eip = false
 
-  # once translated, traffic carries on to the on-premises network
+  # once translated, traffic carries on to the on-premises network. The virtual private
+  # gateway is regional, so every zone routes to it identically and one table serves them all
   routes = {
     onprem = {
       destination_ipv4_cidr_block = local.onprem_cidr
@@ -91,7 +94,7 @@ module "workload" {
     routes = {
       onprem = {
         destination_ipv4_cidr_block = local.onprem_cidr
-        nat_gateway_id              = module.nat_subnet[az].nat_gateway_id
+        nat_gateway_id              = module.nat.nat_gateway_ids[az]
       }
     }
   } }

@@ -1,16 +1,16 @@
 output "app_subnet_ids" {
   description = "Map of availability zone to application tier subnet ID"
-  value       = { for k, v in module.app_subnet : k => v.id }
+  value       = module.app.ids
 }
 
 output "db_subnet_ids" {
   description = "Map of availability zone to database tier subnet ID"
-  value       = { for k, v in module.db_subnet : k => v.id }
+  value       = module.db.ids
 }
 
 output "firewall_subnet_ids" {
   description = "Map of availability zone to firewall subnet ID"
-  value       = { for k, v in module.firewall_subnet : k => v.id }
+  value       = module.firewall.ids
 }
 
 output "firewall_endpoint_ids" {

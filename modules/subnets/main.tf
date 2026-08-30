@@ -69,7 +69,7 @@ module "subnet" {
   create_eip                    = coalesce(each.value.create_eip, var.create_eip)
   eip_network_border_group      = each.value.eip_network_border_group
   nat_gateway_allocation_id     = each.value.nat_gateway_allocation_id
-  nat_gateway_connectivity_type = each.value.nat_gateway_connectivity_type
+  nat_gateway_connectivity_type = each.value.nat_gateway_connectivity_type != null ? each.value.nat_gateway_connectivity_type : var.nat_gateway_connectivity_type
 
   share_subnet       = coalesce(each.value.share_subnet, var.share_subnet)
   resource_share_arn = each.value.resource_share_arn != null ? each.value.resource_share_arn : var.resource_share_arn

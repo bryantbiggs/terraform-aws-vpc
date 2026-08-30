@@ -69,7 +69,7 @@ Passing the IPs into the module is done by setting two variables `reuse_nat_ips 
 
 ## NAT Gateway Scenarios
 
-This module supports three scenarios for creating NAT gateways. Each will be explained in further detail in the corresponding sections.
+This module supports four scenarios for creating NAT gateways. Each will be explained in further detail in the corresponding sections.
 
 - One NAT Gateway per subnet (default behavior)
   - `enable_nat_gateway = true`
@@ -83,8 +83,13 @@ This module supports three scenarios for creating NAT gateways. Each will be exp
   - `enable_nat_gateway = true`
   - `single_nat_gateway = false`
   - `one_nat_gateway_per_az = true`
+- A regional NAT Gateway
+  - `create_regional_nat_gateway = true`
 
 If both `single_nat_gateway` and `one_nat_gateway_per_az` are set to `true`, then `single_nat_gateway` takes precedence.
+
+The first three are zonal and are counted from the subnet lists. The regional NAT gateway is
+independent of them and is controlled by its own variable.
 
 ### One NAT Gateway per subnet (default)
 
@@ -110,6 +115,26 @@ If `one_nat_gateway_per_az = true` and `single_nat_gateway = false`, then the mo
 
 - The variable `var.azs` **must** be specified.
 - The number of public subnet CIDR blocks specified in `public_subnets` **must** be greater than or equal to the number of availability zones specified in `var.azs`. This is to ensure that each NAT Gateway has a dedicated public subnet to deploy to.
+
+### Regional NAT Gateway
+
+A zonal NAT gateway lives in one public subnet and serves one availability zone, so a highly
+available design needs one per zone and a route table per zone to point at them. A regional NAT
+gateway is scoped to the VPC instead. It expands across availability zones on its own, and every
+private subnet routes to the same gateway ID, so a single route table serves all of them:
+
+```hcl
+create_regional_nat_gateway = true
+```
+
+It needs no public subnet to host it, which is why it is not counted from the subnet lists like
+the three scenarios above. Left alone it runs in automatic mode, which is what AWS recommends:
+the gateway manages its own addresses and decides which zones to expand into. Supplying
+`regional_nat_gateway_availability_zone_addresses` switches it to manual mode, where each zone
+is named with the Elastic IP allocations it should use.
+
+The [regional-nat pattern](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/patterns/regional-nat)
+shows the whole topology.
 
 ## "private" versus "intra" subnets
 
@@ -221,44 +246,110 @@ which means the routes attached to them are decided by the module rather than by
 sufficient for common topologies but leaves no room for cases such as sending the public default route
 through a firewall endpoint instead of the internet gateway.
 
+Three additive sub-modules cover the cases the lists cannot. They do not change the root module, and
+they are the composition model the module is moving toward, so configuration written against them now
+carries forward.
+
+### `subnets`, a tier at a time
+
+The [subnets](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/modules/subnets)
+sub-module takes a map of subnets and creates the tier: the subnets, their route tables and routes,
+any NAT gateways, and the tier's network ACL.
+
+```hcl
+module "private" {
+  source = "terraform-aws-modules/vpc/aws//modules/subnets"
+
+  name   = "example-private"
+  vpc_id = module.vpc.vpc_id
+
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+  } }
+
+  routes = {
+    nat = {
+      destination_ipv4_cidr_block = "0.0.0.0/0"
+      nat_gateway_id              = module.public.nat_gateway_ids[local.azs[0]]
+    }
+  }
+}
+```
+
+Whether the tier shares one route table is inferred from where the routes are written rather than
+configured. Routes declared on the group, as above, mean every subnet routes identically, so one table
+is created and shared by all of them. As soon as any subnet declares routes of its own the tier is no
+longer uniform, so every subnet gets its own table, and one that declares none falls back to the
+group's routes on that table:
+
+```hcl
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+
+    # a gateway in every zone, so each subnet needs its own table
+    routes = {
+      nat = {
+        destination_ipv4_cidr_block = "0.0.0.0/0"
+        nat_gateway_id              = module.public.nat_gateway_ids[az]
+      }
+    }
+  } }
+```
+
+This reads the structure of the configuration, which is known when Terraform builds the plan. Reading
+the route targets instead would not work, because a NAT gateway ID is not known until it exists, and
+a resource count that depends on an unknown value fails the plan.
+
+Group settings are defaults that a subnet entry can override, so a tier where one zone differs stays
+a single module block.
+
+The network ACL belongs to this layer rather than to a single subnet, because one network ACL is
+associated with several subnets and no one of them owns it.
+
+### `subnet`, one at a time
+
 The [subnet](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/modules/subnet)
-sub-module creates a single subnet, its route table, and its routes, so callers compose whatever
-topology they need with `for_each`:
+sub-module is the primitive underneath, creating a single subnet with its route table, routes, and
+optionally a NAT gateway. Reach for it when a tier is genuinely one subnet, or when subnets in a tier
+depend on each other, such as a private subnet routing to a NAT gateway in the public subnet beside it.
 
 ```hcl
 module "public_subnet" {
   source = "terraform-aws-modules/vpc/aws//modules/subnet"
 
-  for_each = local.public_subnets
-
-  name              = "example-public-${each.key}"
+  name              = "example-public"
   vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  availability_zone = local.azs[0]
+  ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, 0)
 
   routes = {
     firewall-endpoint = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      vpc_endpoint_id             = local.firewall_endpoints[each.key].endpoint_id
+      vpc_endpoint_id             = local.firewall_endpoints[local.azs[0]].endpoint_id
     }
   }
 }
 ```
 
 Because `routes` is a map, a route is omitted by leaving it out rather than by adding a toggle to the
-root module. See the [network firewall example](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/examples/network-firewall)
-for a full topology.
+root module.
 
-The subnet sub-module does not create gateway route tables. A route table associated with an internet
+### `route-table`, for tables with no subnet
+
+Neither sub-module above creates a gateway route table. A route table associated with an internet
 gateway [must be dedicated to that gateway and associated with no subnet](https://docs.aws.amazon.com/vpc/latest/userguide/igw-ingress-routing.html),
-whereas every route table the subnet sub-module creates is associated with its own subnet. The
-[gateway-route-table](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/modules/route-table)
-sub-module covers that case, taking the same `routes` map and associating the result with a gateway
-rather than a subnet. It is what makes internet gateway ingress routing possible, which is required
-for inbound traffic to reach an inspection appliance.
+whereas the tables those sub-modules create are associated with their own subnets. The
+[route-table](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/modules/route-table)
+sub-module covers that case, taking the same `routes` map and associating the result with a gateway.
+It is what makes internet gateway ingress routing possible, which inbound traffic needs in order to
+reach an inspection appliance.
 
-This sub-module is additive and does not change the root module. It is also the composition model the
-module is moving toward, so configuration written against it now carries forward.
+### Patterns
+
+The [patterns](https://github.com/terraform-aws-modules/terraform-aws-vpc/tree/master/patterns)
+directory holds complete topologies built this way, each one starting from the architecture it serves.
 
 ## Examples
 

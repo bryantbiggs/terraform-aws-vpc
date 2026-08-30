@@ -4,7 +4,9 @@ One account owns the VPC and the subnets. Other accounts launch resources into t
 
 The networking team keeps control of addressing, routing and inspection. Application
 teams get subnets they can use but cannot re-route. This is AWS's recommended answer to
-VPC sprawl, and it is why `modules/subnet` takes `share_subnet` and `resource_share_arn`.
+VPC sprawl, and it is why both subnet sub-modules take `share_subnet` and
+`resource_share_arn`. Sharing is per subnet, so the group sets a default for the tier and
+any subnet in it can be held back.
 
 ## Architecture
 

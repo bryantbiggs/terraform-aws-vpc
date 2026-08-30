@@ -14,6 +14,7 @@ module "wrapper" {
   enable_resource_name_dns_aaaa_record_on_launch = try(each.value.enable_resource_name_dns_aaaa_record_on_launch, var.defaults.enable_resource_name_dns_aaaa_record_on_launch, null)
   map_public_ip_on_launch                        = try(each.value.map_public_ip_on_launch, var.defaults.map_public_ip_on_launch, null)
   name                                           = try(each.value.name, var.defaults.name, "")
+  nat_gateway_connectivity_type                  = try(each.value.nat_gateway_connectivity_type, var.defaults.nat_gateway_connectivity_type, null)
   nat_gateway_tags                               = try(each.value.nat_gateway_tags, var.defaults.nat_gateway_tags, {})
   network_acl_id                                 = try(each.value.network_acl_id, var.defaults.network_acl_id, null)
   network_acl_rules                              = try(each.value.network_acl_rules, var.defaults.network_acl_rules, {})

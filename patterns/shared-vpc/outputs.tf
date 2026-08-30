@@ -5,7 +5,7 @@ output "resource_share_arn" {
 
 output "shared_subnet_ids" {
   description = "Map of team subnet name to subnet ID, usable by participant accounts"
-  value       = { for k, v in module.app_subnet : k => v.id }
+  value       = module.app.ids
 }
 
 output "owner_only_subnet_id" {

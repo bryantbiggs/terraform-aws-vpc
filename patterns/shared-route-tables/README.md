@@ -35,15 +35,17 @@ be per subnet when the routes differ. Nothing else decides it.
 
 Nothing sets a flag. The `subnets` sub-module reads where the routes are written. Routes
 declared once on the group mean every subnet in it routes identically, so it builds one
-table and associates all of them with it. Routes declared inside a subnet entry mean they
-differ, so that subnet takes a table of its own.
+table and associates all of them with it. Routes declared inside the subnet entries mean
+the tier is not uniform, so the shared table is not built and each subnet takes one of
+its own.
 
 The two tiers in this pattern are the same module block with the same arguments. Only the
 position of `routes` changes, and the number of route tables follows from it.
 
-Naming splits the same way. `route_table_tags = { Name = ... }` renames the one table a
-group shares, so it is named independently of its subnets. Tables created per subnet take
-the name of the subnet that owns them.
+Naming splits the same way. On the shared tier, `route_table_tags` on the group renames
+the one table it builds, so the table is named for what it does rather than for any one
+subnet. On the per zone tier, `route_table_tags` on each subnet entry names that subnet's
+own table.
 
 ## Requests this answers
 

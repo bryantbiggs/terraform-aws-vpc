@@ -41,20 +41,22 @@ module "vpc" {
 # the next hop for the application subnets
 ################################################################################
 
-module "endpoint_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.endpoint_subnets
+module "endpoint" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-endpoint-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-endpoint"
+  vpc_id = module.vpc.vpc_id
 
-  # inspected traffic leaves through the gateway; the local route returns the rest
+  subnets = { for az, cidr in local.endpoint_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+  } }
+
+  # inspected traffic leaves through the gateway and the local route returns the rest.
+  # Every zone leaves the same way, so one table serves the group
   routes = {
     igw = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
-      create_gateway_association  = true
       gateway_id                  = module.vpc.igw_id
     }
   }
@@ -68,21 +70,25 @@ module "endpoint_subnet" {
 # Outbound traffic is inspected before it leaves
 ################################################################################
 
-module "application_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.application_subnets
+module "application" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-application-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-application"
+  vpc_id = module.vpc.vpc_id
 
-  routes = {
-    inspection = {
-      destination_ipv4_cidr_block = "0.0.0.0/0"
-      vpc_endpoint_id             = aws_vpc_endpoint.gwlb[each.key].id
+  # each subnet is inspected by the endpoint in its own zone, so the routes differ and
+  # each subnet keeps a route table of its own
+  subnets = { for az, cidr in local.application_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+
+    routes = {
+      inspection = {
+        destination_ipv4_cidr_block = "0.0.0.0/0"
+        vpc_endpoint_id             = aws_vpc_endpoint.gwlb[az].id
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }
@@ -118,12 +124,12 @@ module "igw_ingress" {
 
 # One endpoint per zone, into the appliance fleet's endpoint service
 resource "aws_vpc_endpoint" "gwlb" {
-  for_each = module.endpoint_subnet
+  for_each = module.endpoint.ids
 
   vpc_id            = module.vpc.vpc_id
   service_name      = var.gwlb_service_name
   vpc_endpoint_type = "GatewayLoadBalancer"
-  subnet_ids        = [each.value.id]
+  subnet_ids        = [each.value]
 
   tags = merge(local.tags, { Name = "${local.name}-${each.key}" })
 }

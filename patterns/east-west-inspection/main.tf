@@ -46,14 +46,16 @@ module "vpc" {
 # redirect on this table would send it straight back into the firewall
 ################################################################################
 
-module "firewall_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.firewall_subnets
+module "firewall" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-firewall-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-firewall"
+  vpc_id = module.vpc.vpc_id
+
+  subnets = { for az, cidr in local.firewall_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+  } }
 
   tags = local.tags
 }
@@ -62,22 +64,26 @@ module "firewall_subnet" {
 # Application tier, sending database traffic through inspection first
 ################################################################################
 
-module "app_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.app_subnets
+module "app" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-app-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-app"
+  vpc_id = module.vpc.vpc_id
 
-  # more specific than the local route, so it wins
-  routes = {
-    to_db = {
-      destination_ipv4_cidr_block = local.db_subnets[each.key]
-      vpc_endpoint_id             = local.firewall_endpoints[each.key].endpoint_id
+  # the endpoint is zonal, so each subnet redirects to the one in its own zone and
+  # therefore keeps a route table of its own
+  subnets = { for az, cidr in local.app_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+
+    # more specific than the local route, so it wins
+    routes = {
+      to_db = {
+        destination_ipv4_cidr_block = local.db_subnets[az]
+        vpc_endpoint_id             = local.firewall_endpoints[az].endpoint_id
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }
@@ -86,21 +92,23 @@ module "app_subnet" {
 # Database tier, sending the return leg back through the same endpoint
 ################################################################################
 
-module "db_subnet" {
-  source   = "../../modules/subnet"
-  for_each = local.db_subnets
+module "db" {
+  source = "../../modules/subnets"
 
-  name              = "${local.name}-db-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
+  name   = "${local.name}-db"
+  vpc_id = module.vpc.vpc_id
 
-  routes = {
-    to_app = {
-      destination_ipv4_cidr_block = local.app_subnets[each.key]
-      vpc_endpoint_id             = local.firewall_endpoints[each.key].endpoint_id
+  subnets = { for az, cidr in local.db_subnets : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidr
+
+    routes = {
+      to_app = {
+        destination_ipv4_cidr_block = local.app_subnets[az]
+        vpc_endpoint_id             = local.firewall_endpoints[az].endpoint_id
+      }
     }
-  }
+  } }
 
   tags = local.tags
 }
@@ -121,9 +129,9 @@ module "network_firewall" {
   subnet_change_protection          = false
 
   vpc_id = module.vpc.vpc_id
-  subnet_mapping = { for k, v in module.firewall_subnet :
+  subnet_mapping = { for k, v in module.firewall.ids :
     (k) => {
-      subnet_id       = v.id
+      subnet_id       = v
       ip_address_type = "IPV4"
     }
   }

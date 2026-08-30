@@ -47,33 +47,25 @@ module "vpc" {
 # One route table for every zone, because every subnet routes to the same gateway ID
 ################################################################################
 
-module "private_route_table" {
-  source = "../../modules/route-table"
+module "private" {
+  source = "../../modules/subnets"
 
   name   = "${local.name}-private"
   vpc_id = module.vpc.vpc_id
 
+  subnets = { for i, az in local.azs : az => {
+    availability_zone = az
+    ipv4_cidr_block   = cidrsubnet(local.vpc_cidr, 8, i)
+  } }
+
+  # a regional NAT gateway is one gateway ID for every zone, so the group's routes are
+  # identical and a single table is created and shared
   routes = {
     nat = {
       destination_ipv4_cidr_block = "0.0.0.0/0"
       nat_gateway_id              = module.vpc.regional_nat_gateway_id
     }
   }
-
-  tags = local.tags
-}
-
-module "private_subnet" {
-  source   = "../../modules/subnet"
-  for_each = { for i, az in local.azs : az => cidrsubnet(local.vpc_cidr, 8, i) }
-
-  name              = "${local.name}-private-${each.key}"
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-  ipv4_cidr_block   = each.value
-
-  create_route_table = false
-  route_table_id     = module.private_route_table.id
 
   tags = local.tags
 }

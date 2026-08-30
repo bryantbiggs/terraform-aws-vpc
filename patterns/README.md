@@ -65,7 +65,7 @@ sure the arguments no other pattern sets are still exercised by something.
 
 | Pattern | Self-contained | Answers |
 | ------- | -------------- | ------- |
-| [subnet-options](subnet-options/) | yes | the inputs and outputs of `modules/subnet` that no other pattern reaches, including all four timeout paths |
+| [subnet-options](subnet-options/) | yes | the inputs and outputs of both subnet sub-modules that no other pattern reaches, including all six timeout paths, the group network ACL rules, and `create = false` on both |
 
 ## Not covered here
 
